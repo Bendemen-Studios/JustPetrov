@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JustPetrov — Connect Spotify</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../footer.css">
+<style>
+body{min-height:100vh}.connect{max-width:760px;margin:0 auto;padding:140px 24px 80px}.connect h1{font-size:clamp(42px,8vw,88px);line-height:.9;margin:0 0 20px}.connect h1 span{color:var(--gold-bright)}.box{border:1px solid var(--line);padding:28px;background:rgba(255,255,255,.015)}label{display:block;font:700 10px 'Space Mono',monospace;letter-spacing:.12em;color:var(--gold-bright);margin-bottom:8px}input{width:100%;box-sizing:border-box;background:#050505;border:1px solid var(--line);color:inherit;padding:14px;font:14px 'Space Mono',monospace;margin-bottom:14px}button{border:1px solid var(--gold-bright);background:transparent;color:inherit;padding:13px 18px;font:700 11px 'Space Mono',monospace;cursor:pointer}button:hover{background:var(--gold-bright);color:#000}.note{font:12px/1.7 Inter,sans-serif;color:var(--muted);margin:18px 0}.result{display:none;margin-top:20px}.token{word-break:break-all;border:1px solid var(--line);padding:14px;font:11px/1.6 'Space Mono',monospace}.back{display:inline-block;margin-top:18px;color:var(--gold-bright)}
+</style></head>
+<body><div class="grain"></div>
+<header class="nav"><a class="brand" href="/" aria-label="JustPetrov"><img src="../assets/logo.png" alt="Petrov"></a><nav><a href="/">HOME</a><a href="/setup">MY SETUP</a><a href="/profiles">PROFILES</a><a href="/projects">PROJECTS</a><a href="/skills">SKILLS</a><a href="/stats">MUSIC STATS</a></nav></header>
+<main class="connect"><div class="kicker">JUSTPETROV / SPOTIFY</div><h1>CONNECT<br><span>SPOTIFY</span></h1><div class="box"><label for="client-id">SPOTIFY CLIENT ID</label><input id="client-id" autocomplete="off" placeholder="Paste your Spotify Client ID"><p class="note">This page uses Spotify Authorization Code with PKCE. Your client secret is never requested or stored here. After Spotify approval, copy the refresh token and save it as the GitHub Actions secret <b>SPOTIFY_REFRESH_TOKEN</b>.</p><button id="connect">CONNECT WITH SPOTIFY</button><div class="result" id="result"><p class="note">Your refresh token:</p><div class="token" id="token"></div><p class="note">Save this value in GitHub → Settings → Secrets and variables → Actions → New repository secret. Then add <b>SPOTIFY_CLIENT_ID</b> with the same Client ID.</p><a class="back" href="/stats">← BACK TO MUSIC STATS</a></div></div></main>
+<script>
+const redirectUri=location.origin+location.pathname;
+const scopes='user-read-recently-played user-top-read';
+const enc=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+async function sha256(v){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(v))}
+function randomString(n=64){const a=new Uint8Array(n);crypto.getRandomValues(a);return enc(a)}
+const params=new URLSearchParams(location.search);const code=params.get('code');
+async function finish(){
+ const verifier=localStorage.getItem('spotify_pkce_verifier');const clientId=localStorage.getItem('spotify_client_id');
+ if(!code||!verifier||!clientId)return;
+ try{const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:clientId,grant_type:'authorization_code',code,redirect_uri:redirectUri,code_verifier:verifier})});const d=await r.json();if(!r.ok)throw new Error(d.error_description||'Token exchange failed');document.getElementById('token').textContent=d.refresh_token||'No refresh token returned. Remove app authorization and try again.';document.getElementById('result').style.display='block';history.replaceState({},'',redirectUri);localStorage.removeItem('spotify_pkce_verifier');}catch(e){alert(e.message)}}
+document.getElementById('connect').onclick=async()=>{const clientId=document.getElementById('client-id').value.trim();if(!clientId)return alert('Enter your Spotify Client ID first.');const verifier=randomString();const challenge=enc(await sha256(verifier));localStorage.setItem('spotify_pkce_verifier',verifier);localStorage.setItem('spotify_client_id',clientId);const url=new URL('https://accounts.spotify.com/authorize');url.search=new URLSearchParams({client_id:clientId,response_type:'code',redirect_uri:redirectUri,code_challenge_method:'S256',code_challenge:challenge,scope:scopes}).toString();location.href=url}
+finish();
+</script><script src="../footer.js" defer></script></body></html>
