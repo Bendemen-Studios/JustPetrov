@@ -1,0 +1,35 @@
+name: Spotify Stats Cron
+
+on:
+  schedule:
+    # GitHub Actions supports a minimum cron interval of 5 minutes.
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update Spotify statistics
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+        run: node tools/spotify-stats.mjs
+
+      - name: Commit updated statistics
+        run: |
+          if git diff --quiet -- stats/data.json stats/listening.json; then
+            echo "No Spotify stats changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stats/data.json stats/listening.json
+          git commit -m "Update Spotify stats"
+          git push
