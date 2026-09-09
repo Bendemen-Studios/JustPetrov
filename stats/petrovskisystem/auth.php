@@ -2,6 +2,21 @@
 
 declare(strict_types=1);
 
+// Load a local .env file when present. Keep it outside public access on the server.
+$envFile = dirname(__DIR__, 2) . '/.env';
+if (is_readable($envFile)) {
+    foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
+        $line = trim($line);
+        if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) continue;
+        [$key, $value] = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value);
+        if (($value[0] ?? '') === '"' && str_ends_with($value, '"')) $value = substr($value, 1, -1);
+        if (($value[0] ?? '') === "'" && str_ends_with($value, "'")) $value = substr($value, 1, -1);
+        if ($key !== '' && getenv($key) === false) putenv($key . '=' . $value);
+    }
+}
+
 session_name('jp_spotify_admin');
 session_set_cookie_params([
     'httponly' => true,
@@ -14,7 +29,6 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 const USERNAME = 'bendemen';
-const PASSWORD_HASH = '6f8c08f07aa2740abd5d6bf3e93739536a062a06512fbc362bd64394fad0e6b5';
 const CODE_TTL = 600;
 const MAX_CODE_ATTEMPTS = 5;
 const SMTP_HOST = 'JustPetrov.com';
@@ -107,6 +121,7 @@ function sendAuthMail(string $code, string $location): void {
 
 $action = (string)($_GET['action'] ?? '');
 $data = input();
+$passwordHash = getenv('ADMIN_PASSWORD_HASH') ?: '';
 
 if ($action === 'status') {
     out(true, '', ['authenticated' => !empty($_SESSION['authenticated'])]);
@@ -123,9 +138,10 @@ if ($action === 'logout') {
 }
 
 if ($action === 'request') {
+    if ($passwordHash === '') out(false, 'ADMIN_PASSWORD_HASH is not configured on the server.');
     $user = (string)($data['username'] ?? '');
     $pass = (string)($data['password'] ?? '');
-    if (!hash_equals(USERNAME, $user) || !hash_equals(PASSWORD_HASH, hash('sha256', $pass))) {
+    if (!hash_equals(USERNAME, $user) || !hash_equals($passwordHash, hash('sha256', $pass))) {
         usleep(250000);
         out(false, 'INVALID LOGIN');
     }
