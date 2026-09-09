@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-// Load a local .env file when present. Keep it outside public access on the server.
+// Load the root .env file when present.
 $envFile = dirname(__DIR__, 2) . '/.env';
 if (is_readable($envFile)) {
     foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
@@ -34,6 +34,7 @@ const MAX_CODE_ATTEMPTS = 5;
 const SMTP_HOST = 'JustPetrov.com';
 const SMTP_PORT = 465;
 const SMTP_USER = 'automail@justpetrov.com';
+const ADMIN_EMAIL = 'ben@justpetrov.com';
 
 function out(bool $ok, string $message = '', array $extra = []): never {
     http_response_code($ok ? 200 : 400);
@@ -98,14 +99,14 @@ function sendAuthMail(string $code, string $location): void {
         smtpCommand($fp, base64_encode(SMTP_USER), 334);
         smtpCommand($fp, base64_encode($password), 235);
         smtpCommand($fp, 'MAIL FROM:<' . SMTP_USER . '>', 250);
-        smtpCommand($fp, 'RCPT TO:<' . SMTP_USER . '>', 250);
+        smtpCommand($fp, 'RCPT TO:<' . ADMIN_EMAIL . '>', 250);
         fwrite($fp, "DATA\r\n");
         smtpExpect($fp, 354);
 
         $body = "(Auth Code)\r\nPage: Spotify Admin Login\r\nOrigin: " . $location . "\r\n\r\nYour authentication code is: " . $code . "\r\nThis code expires in 10 minutes.\r\n";
         $body = preg_replace('/(?m)^\./', '..', $body) ?? $body;
         $message = "From: JustPetrov Admin <" . SMTP_USER . ">\r\n" .
-                   "To: " . SMTP_USER . "\r\n" .
+                   "To: " . ADMIN_EMAIL . "\r\n" .
                    "Subject: Auth Code Requested\r\n" .
                    "Date: " . date(DATE_RFC2822) . "\r\n" .
                    "MIME-Version: 1.0\r\n" .
