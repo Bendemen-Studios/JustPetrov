@@ -1,3 +1,15 @@
+# Keep HTML, CSS and JavaScript fresh after Git deployments.
+# Browsers revalidate these files so updated versions are picked up without
+# the old automatic reload/flicker behaviour.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(html?|css|js)$">
+        Header set Cache-Control "no-cache, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+</IfModule>
+
+# Never expose the root environment file.
 <FilesMatch "^\.env(?:\.|$)">
     Require all denied
 </FilesMatch>
