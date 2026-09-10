@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /stats/petrovskisystem/
+
+Sitemap: https://justpetrov.com/sitemap.xml
