@@ -36,6 +36,7 @@ const SMTP_PORT = 465;
 const SMTP_USER = 'automail@justpetrov.com';
 const ADMIN_EMAIL = 'ben@justpetrov.com';
 const FROM_NAME = 'Automail | JustPetrov';
+const QUOTA_LOG = __DIR__ . '/../quota-log.json';
 
 function out(bool $ok, string $message = '', array $extra = []): never {
     http_response_code($ok ? 200 : 400);
@@ -187,6 +188,19 @@ if ($action === 'verify') {
 if ($action === 'check') {
     if (empty($_SESSION['authenticated'])) out(false, 'UNAUTHORIZED');
     out(true, 'AUTHORIZED', ['authenticated' => true]);
+}
+
+if ($action === 'quota_log') {
+    if (empty($_SESSION['authenticated'])) out(false, 'UNAUTHORIZED');
+    $log = [];
+    if (is_readable(QUOTA_LOG)) {
+        $raw = file_get_contents(QUOTA_LOG);
+        $decoded = json_decode($raw ?: '[]', true);
+        if (is_array($decoded)) $log = $decoded;
+    }
+    $log = array_values(array_slice($log, -10));
+    $log = array_reverse($log);
+    out(true, '', ['logs' => $log, 'count' => count($log)]);
 }
 
 out(false, 'Unknown action.');
