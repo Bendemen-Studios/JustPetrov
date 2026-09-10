@@ -112,7 +112,7 @@ if(menu&&!menu.querySelector('.projects-dropdown')){
   const dropdown=document.createElement('div');dropdown.className='projects-dropdown';
   const current=location.pathname.replace(/\/+$/,'')||'/';
   if(current==='/projects')projectsLink.classList.add('active');
-  const trigger=projectsLink.cloneNode(true);trigger.removeAttribute('class');trigger.setAttribute('aria-haspopup','true');trigger.setAttribute('aria-expanded','false');trigger.innerHTML='PROJECTS <span class="dropdown-chevron">▾</span>';
+  const trigger=projectsLink.cloneNode(true);trigger.removeAttribute('class');trigger.setAttribute('aria-haspopup','true');trigger.setAttribute('aria-expanded','false');trigger.innerHTML='PROJECTS';
   const submenu=document.createElement('div');submenu.className='projects-dropdown-menu';
   const modrinth=document.createElement('a');modrinth.href='/modrinth';modrinth.textContent='MODRINTH';if(current==='/modrinth')modrinth.className='active';submenu.appendChild(modrinth);
   const arrow=document.createElement('button');arrow.type='button';arrow.className='projects-mobile-arrow';arrow.setAttribute('aria-label','Toggle Projects submenu');arrow.setAttribute('aria-expanded','false');dropdown.append(trigger,submenu,arrow);projectsLink.replaceWith(dropdown);
