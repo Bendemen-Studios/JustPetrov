@@ -114,7 +114,7 @@ if(menu&&!menu.querySelector('.projects-dropdown')){
   const submenu=document.createElement('div');submenu.className='projects-dropdown-menu';
   const modrinth=document.createElement('a');modrinth.href='/modrinth';modrinth.textContent='MODRINTH';if(current==='/modrinth')modrinth.className='active';submenu.appendChild(modrinth);
   dropdown.append(trigger,submenu);projectsLink.replaceWith(dropdown);
-  trigger.addEventListener('click',e=>{if(window.innerWidth<=900){e.preventDefault();const open=dropdown.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open))}});
+  trigger.addEventListener('click',e=>{if(window.innerWidth<=900){return}});
  }
 }
 
