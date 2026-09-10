@@ -52,7 +52,7 @@ footer .contact a:visited{color:var(--gold-bright)!important}
  .projects-dropdown.open .projects-dropdown-menu a{border-bottom:0!important;padding:12px 0!important;font-size:11px!important}
  .worked-with{padding:22px 0 8px;min-width:0!important;width:100%!important;max-width:100%!important}
  .worked-with-title{font-size:9px!important;letter-spacing:.13em!important;white-space:normal!important;line-height:1.65!important;max-width:100%!important;width:100%!important;padding-right:4px;box-sizing:border-box}
- .worked-slider{height:92px}.worked-track{gap:18px;animation-duration:15s}.worked-slide{width:145px;height:72px;opacity:1}.worked-slide img{max-width:135px;max-height:56px}.worked-slide img[src*="stichtingsuperhelden.png"]{width:135px;max-width:135px;height:56px;max-height:56px}
+ .worked-slider{height:92px}.worked-track{gap:18px;animation-duration:22s}.worked-slide{width:145px;height:72px;opacity:1}.worked-slide img{max-width:135px;max-height:56px}.worked-slide img[src*="stichtingsuperhelden.png"]{width:135px;max-width:135px;height:56px;max-height:56px}
  main,footer{width:calc(100% - 36px);max-width:100%}
  footer{grid-template-columns:minmax(0,1fr)!important;gap:0;padding-bottom:36px!important;min-width:0!important;overflow:hidden!important}
  footer .footer-meta{text-align:left!important;padding-top:6px!important}
@@ -83,7 +83,7 @@ document.querySelectorAll('.worked-slider').forEach(slider=>{
  slides.forEach(slide=>{
   const img=slide.querySelector('img');
   if(!img)return;
-  const key=(img.getAttribute('src')||'').split('/').pop().toLowerCase();
+  const key=((img.getAttribute('src')||'').split('/').pop().split('?')[0].split('#')[0]).toLowerCase();
   const href=links[key];
   if(href&&!slide.querySelector('a')){const a=document.createElement('a');a.href=href;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label','Open '+(img.alt||key));img.parentNode.insertBefore(a,img);a.appendChild(img)}
  });
@@ -92,8 +92,7 @@ document.querySelectorAll('.worked-slider').forEach(slider=>{
  const addSet=(source,hidden=false)=>source.forEach(slide=>{const item=slide.cloneNode(true);if(hidden)item.setAttribute('aria-hidden','true');track.appendChild(item)});
  addSet(slides);addSet(slides,true);
  const fillLoop=()=>{let sets=2;while(track.scrollWidth<slider.clientWidth*2){addSet(base,true);sets++}if(sets%2)addSet(base,true)};
- track.querySelectorAll('.worked-slide[aria-hidden="true"] a').forEach(a=>{a.removeAttribute('href');a.removeAttribute('target');a.removeAttribute('rel');a.setAttribute('tabindex','-1')});
- slider.replaceChildren(track);fillLoop();
+  slider.replaceChildren(track);fillLoop();
  const canHover=()=>window.matchMedia('(hover:hover) and (pointer:fine)').matches;
  if(canHover())track.style.animationPlayState='running';
  track.addEventListener('pointerenter',e=>{if(canHover()&&e.target.closest('.worked-slide>a'))track.style.animationPlayState='paused'});
