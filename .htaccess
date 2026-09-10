@@ -13,3 +13,8 @@
 <FilesMatch "^\.env(?:\.|$)">
     Require all denied
 </FilesMatch>
+
+# The Spotify quota log is private and is only exposed through the authenticated admin endpoint.
+<FilesMatch "^quota-log\.json$">
+    Require all denied
+</FilesMatch>
