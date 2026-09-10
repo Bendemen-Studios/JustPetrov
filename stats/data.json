@@ -1,11 +1,12 @@
 {
-  "updated": "2026-09-10T01:01:02.955Z",
+  "updated": "2026-09-10T05:45:20.407Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 66,
-    "week": 266,
-    "month": 266
+    "day": 229,
+    "week": 429,
+    "month": 429
   },
+  "live": null,
   "topArtists": [
     {
       "name": "Zara Larsson",
