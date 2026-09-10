@@ -1,0 +1,44 @@
+name: One-time footer admin link
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add Admin Dashboard link and right-align it
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('footer.js')
+          s = p.read_text()
+          marker = '\n})();'
+          snippet = r'''\nconst addAdminDashboardLink=()=>{document.querySelectorAll('footer .contact').forEach(contact=>{if(contact.querySelector('.admin-dashboard-link'))return;const a=document.createElement('a');a.className='admin-dashboard-link';a.href='/admin/';a.textContent='Admin Dashboard';contact.appendChild(a)})};\nif(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addAdminDashboardLink);else addAdminDashboardLink();'''
+          if 'admin-dashboard-link' not in s:
+              if marker not in s:
+                  raise SystemExit('footer.js end marker not found')
+              s=s.replace(marker, snippet+marker, 1)
+              p.write_text(s)
+          css=Path('footer.css')
+          c=css.read_text()
+          rule='@media(min-width:901px){footer .contact .admin-dashboard-link{margin-left:auto;color:var(--gold-bright)!important}}@media(max-width:900px){footer .contact .admin-dashboard-link{align-self:flex-end;color:var(--gold-bright)!important}}'
+          if '.admin-dashboard-link' not in c:
+              css.write_text(c+'\n'+rule+'\n')
+          PY
+      - name: Commit and remove one-time workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add footer.js footer.css .github/workflows/one-time-footer-admin-link.yml
+          git commit -m "Add right-aligned Admin Dashboard footer link [skip ci]"
+          git rm .github/workflows/one-time-footer-admin-link.yml
+          git commit -m "Remove one-time footer workflow [skip ci]"
+          git push
