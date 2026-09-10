@@ -72,7 +72,7 @@ footer .contact a:visited{color:var(--gold-bright)!important}
  main,footer{width:calc(100% - 28px)}.nav .brand{width:140px}.nav .brand img{width:140px}.mobile-menu-toggle{left:14px}.page-hero{padding-top:142px}.page-hero h1{font-size:clamp(62px,18vw,105px)}
  .worked-slide{width:125px!important}.worked-slide img{max-width:120px!important}.worked-slide img[src*="stichtingsuperhelden.png"]{width:120px;max-width:120px;height:56px;max-height:56px}.worked-slider:before,.worked-slider:after{width:20%}
 }
-@media(prefers-reduced-motion:reduce){.worked-track{animation:none;transform:none}}
+@media(prefers-reduced-motion:reduce){.worked-track{animation:workedMarquee 22s linear infinite!important;animation-play-state:running!important}.worked-slide{animation:none;opacity:1}}
 `;
 document.head.appendChild(style);
 const cookieStyle=document.createElement('link');cookieStyle.rel='stylesheet';cookieStyle.href='/cookie.css?v=20260910';document.head.appendChild(cookieStyle);
