@@ -10,8 +10,6 @@ const historyPath = path.join(rootDir, 'stats', 'listening.json');
 const quotaLogPath = path.join(rootDir, 'stats', 'quota-log.json');
 const timeZone = process.env.STATS_TIMEZONE || 'Europe/Amsterdam';
 
-// Load the root .env when running on Cloud86. Existing environment variables
-// always take priority.
 if (fs.existsSync(envPath)) {
   const envText = fs.readFileSync(envPath, 'utf8');
   for (const rawLine of envText.split(/\r?\n/)) {
@@ -37,10 +35,7 @@ function logQuotaExceeded(entry) {
       try { log = JSON.parse(fs.readFileSync(quotaLogPath, 'utf8')); } catch { log = []; }
     }
     if (!Array.isArray(log)) log = [];
-    log.push({
-      timestamp: new Date().toISOString(),
-      ...entry
-    });
+    log.push({ timestamp: new Date().toISOString(), ...entry });
     log = log.slice(-100);
     const temp = `${quotaLogPath}.tmp`;
     fs.writeFileSync(temp, JSON.stringify(log, null, 2) + '\n');
@@ -64,19 +59,9 @@ async function request(url, options = {}, attempts = 4) {
       const reason = body?.error?.reason || body?.reason || '';
       const message = body?.error?.message || body?.message || '';
       const endpoint = new URL(url).pathname;
-
-      console.error(`[Spotify] 429 RATE LIMITED${reason ? ` (${reason})` : ''} ${endpoint}${retryAfterHeader ? ` - retry after ${retryAfterHeader}s` : ''}`);
-      if (reason === 'QUOTA_EXCEEDED') {
-        logQuotaExceeded({
-          status: 429,
-          reason,
-          endpoint,
-          retryAfter: Number.isFinite(retryAfter) ? retryAfter : null,
-          message: message || null,
-          attempt: attempt + 1
-        });
-      }
-
+      const type = reason === 'QUOTA_EXCEEDED' ? 'QUOTA_EXCEEDED' : 'RATE_LIMITED';
+      console.error(`[Spotify] 429 ${type} ${endpoint}${retryAfterHeader ? ` - retry after ${retryAfterHeader}s` : ''}${message ? ` - ${message}` : ''}`);
+      logQuotaExceeded({ status: 429, type, reason: reason || null, endpoint, retryAfter: Number.isFinite(retryAfter) ? retryAfter : null, message: message || null, attempt: attempt + 1 });
       const wait = Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 15000) : Math.min(1000 * 2 ** attempt, 8000);
       await new Promise(resolve => setTimeout(resolve, wait));
       continue;
@@ -87,6 +72,7 @@ async function request(url, options = {}, attempts = 4) {
       const retryAfterHeader = res.headers.get('retry-after');
       const retryAfter = Number(retryAfterHeader);
       const wait = Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 15000) : Math.min(1000 * 2 ** attempt, 8000);
+      console.error(`[Spotify] ${res.status} server error${rawBody ? ` - ${rawBody.slice(0, 300)}` : ''}`);
       await new Promise(resolve => setTimeout(resolve, wait));
       continue;
     }
@@ -112,11 +98,7 @@ async function spotify(apiPath) {
 function localDate(date) {
   return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
 }
-
-function localMonth(date) {
-  return localDate(date).slice(0, 7);
-}
-
+function localMonth(date) { return localDate(date).slice(0, 7); }
 function startOfLocalWeek(date) {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
   const values = Object.fromEntries(parts.map(p => [p.type, p.value]));
@@ -127,17 +109,17 @@ function startOfLocalWeek(date) {
 }
 
 let data = {};
-if (fs.existsSync(dataPath)) {
-  try { data = JSON.parse(fs.readFileSync(dataPath, 'utf8')); } catch { data = {}; }
-}
+if (fs.existsSync(dataPath)) { try { data = JSON.parse(fs.readFileSync(dataPath, 'utf8')); } catch { data = {}; } }
 let history = { processed: [], days: {} };
-if (fs.existsSync(historyPath)) {
-  try { history = JSON.parse(fs.readFileSync(historyPath, 'utf8')); } catch { history = { processed: [], days: {} }; }
-}
+if (fs.existsSync(historyPath)) { try { history = JSON.parse(fs.readFileSync(historyPath, 'utf8')); } catch { history = { processed: [], days: {} }; } }
 history.processed ??= [];
 history.days ??= {};
 
-const recent = await spotify('/me/player/recently-played?limit=50');
+const authHeaders = { headers: { Authorization: `Bearer ${token.access_token}` } };
+const [recent, currentlyPlaying] = await Promise.all([
+  spotify('/me/player/recently-played?limit=50'),
+  spotify('/me/player/currently-playing')
+]);
 const processed = new Set(history.processed);
 const now = new Date();
 
@@ -146,16 +128,13 @@ for (const item of recent.items ?? []) {
   if (!track?.id || !item.played_at) continue;
   const key = `${item.played_at}|${track.id}`;
   if (processed.has(key)) continue;
-
   const played = new Date(item.played_at);
   if (Number.isNaN(played.getTime())) continue;
   const date = localDate(played);
   const day = history.days[date] ??= { minutes: 0, tracks: {} };
   day.minutes += Number(track.duration_ms || 0) / 60000;
-
   const artist = track.artists?.[0];
-  const trackKey = track.id;
-  const entry = day.tracks[trackKey] ??= {
+  const entry = day.tracks[track.id] ??= {
     name: track.name,
     artist: artist?.name || 'Unknown artist',
     url: track.external_urls?.spotify || `https://open.spotify.com/track/${track.id}`,
@@ -166,7 +145,6 @@ for (const item of recent.items ?? []) {
   processed.add(key);
 }
 
-// Keep a large rolling key set so old plays are not accidentally counted twice.
 history.processed = [...processed].slice(-100000);
 
 const today = localDate(now);
@@ -177,7 +155,6 @@ let weekMinutes = 0;
 let monthMinutes = 0;
 const artists = new Map();
 const tracks = new Map();
-
 for (const [date, day] of Object.entries(history.days)) {
   if (date === today) dayMinutes += Number(day.minutes || 0);
   if (date >= weekStart && date <= today) weekMinutes += Number(day.minutes || 0);
@@ -187,11 +164,31 @@ for (const [date, day] of Object.entries(history.days)) {
       const t = tracks.get(id) ?? { ...track, plays: 0 };
       t.plays += Number(track.plays || 0);
       tracks.set(id, t);
-      const artistKey = track.artist;
-      const a = artists.get(artistKey) ?? { name: artistKey, url: track.artistUrl || '#', plays: 0 };
+      const a = artists.get(track.artist) ?? { name: track.artist, url: track.artistUrl || '#', plays: 0 };
       a.plays += Number(track.plays || 0);
-      artists.set(artistKey, a);
+      artists.set(track.artist, a);
     }
+  }
+}
+
+let live = null;
+if (currentlyPlaying?.item?.id) {
+  const track = currentlyPlaying.item;
+  const progressMs = Math.max(0, Number(currentlyPlaying.progress_ms || 0));
+  const durationMs = Math.max(progressMs, Number(track.duration_ms || progressMs));
+  const isPlaying = currentlyPlaying.is_playing === true;
+  live = {
+    isPlaying,
+    trackId: track.id,
+    progressMs,
+    durationMs,
+    fetchedAt: now.toISOString()
+  };
+  if (isPlaying && durationMs > 0) {
+    const liveMinutes = progressMs / 60000;
+    dayMinutes += liveMinutes;
+    weekMinutes += liveMinutes;
+    monthMinutes += liveMinutes;
   }
 }
 
@@ -201,12 +198,12 @@ const topTracks = [...tracks.values()].sort((a, b) => b.plays - a.plays).slice(0
 data = {
   updated: now.toISOString(),
   month: new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone }).format(now),
-  listeningMinutes: { day: Math.round(dayMinutes), week: Math.round(weekMinutes), month: Math.round(monthMinutes) },
+  listeningMinutes: { day: Math.floor(dayMinutes), week: Math.floor(weekMinutes), month: Math.floor(monthMinutes) },
+  live,
   topArtists,
   topTracks
 };
 
-// Write through temporary files so the live endpoint never sees half-written JSON.
 const writeAtomic = (file, value) => {
   const temp = `${file}.tmp`;
   fs.writeFileSync(temp, value);
