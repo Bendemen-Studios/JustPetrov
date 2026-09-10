@@ -26,7 +26,9 @@ footer .contact a:visited{color:var(--gold-bright)!important}
 .projects-dropdown-menu a:after,.projects-dropdown-menu a:before{content:none!important;display:none!important}
 .projects-dropdown:hover .projects-dropdown-menu,.projects-dropdown:focus-within .projects-dropdown-menu{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0)}
 .dropdown-chevron{font-size:9px;margin-left:5px}
+.projects-mobile-arrow{display:none}
 .nav nav .projects-dropdown>a{height:100%;display:flex;align-items:center;text-decoration:none}
+@media(max-width:900px){.projects-dropdown>a{padding-right:48px!important}.projects-mobile-arrow{display:flex!important;position:absolute!important;right:0!important;top:0!important;width:42px!important;height:52px!important;align-items:center!important;justify-content:center!important;padding:0!important;border:0!important;border-bottom:1px solid var(--line-soft)!important;background:transparent!important;color:var(--gold-bright)!important;font:700 15px/1 'Space Mono',monospace!important;cursor:pointer!important;z-index:2}.projects-mobile-arrow:after{content:'⌄';transition:transform .2s ease}.projects-dropdown.open .projects-mobile-arrow:after{transform:rotate(180deg)}}
 .worked-slide img[src*="stichtingsuperhelden.png"]{width:180px;max-width:180px;height:70px;max-height:70px;object-fit:contain;object-position:center;background:transparent;mix-blend-mode:screen}
 .worked-slide img[src*="stichtingsuperhelden.png"]:hover{transform:scale(1.04)}
 @media(max-width:900px){
@@ -113,8 +115,10 @@ if(menu&&!menu.querySelector('.projects-dropdown')){
   const trigger=projectsLink.cloneNode(true);trigger.removeAttribute('class');trigger.setAttribute('aria-haspopup','true');trigger.setAttribute('aria-expanded','false');trigger.innerHTML='PROJECTS <span class="dropdown-chevron">▾</span>';
   const submenu=document.createElement('div');submenu.className='projects-dropdown-menu';
   const modrinth=document.createElement('a');modrinth.href='/modrinth';modrinth.textContent='MODRINTH';if(current==='/modrinth')modrinth.className='active';submenu.appendChild(modrinth);
-  dropdown.append(trigger,submenu);projectsLink.replaceWith(dropdown);
-  trigger.addEventListener('click',e=>{if(window.innerWidth<=900){return}});
+  const arrow=document.createElement('button');arrow.type='button';arrow.className='projects-mobile-arrow';arrow.setAttribute('aria-label','Toggle Projects submenu');arrow.setAttribute('aria-expanded','false');dropdown.append(trigger,submenu,arrow);projectsLink.replaceWith(dropdown);
+  const setOpen=open=>{dropdown.classList.toggle('open',open);arrow.setAttribute('aria-expanded',String(open));trigger.setAttribute('aria-expanded',String(open))};
+  arrow.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setOpen(!dropdown.classList.contains('open'))});
+  trigger.addEventListener('click',e=>{if(window.innerWidth<=900){e.preventDefault();location.href='/projects'}});
  }
 }
 
@@ -122,7 +126,7 @@ const mobile=document.querySelector('.nav nav');
 if(nav&&mobile&&!document.querySelector('.mobile-menu-toggle')){
  const button=document.createElement('button');button.className='mobile-menu-toggle';button.type='button';button.setAttribute('aria-label','Open menu');button.setAttribute('aria-expanded','false');button.innerHTML='<span></span><span></span><span></span>';
  const backdrop=document.createElement('div');backdrop.className='mobile-menu-backdrop';document.body.appendChild(backdrop);mobile.classList.add('mobile-menu');nav.appendChild(button);
- const close=()=>{mobile.classList.remove('open');backdrop.classList.remove('open');nav.classList.remove('mobile-open');document.body.classList.remove('menu-open');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open menu');const pd=mobile.querySelector('.projects-dropdown');if(pd){pd.classList.remove('open');const t=pd.querySelector(':scope>a');if(t)t.setAttribute('aria-expanded','false')}};
+ const close=()=>{mobile.classList.remove('open');backdrop.classList.remove('open');nav.classList.remove('mobile-open');document.body.classList.remove('menu-open');button.setAttribute('aria-expanded','false');button.setAttribute('aria-label','Open menu');const pd=mobile.querySelector('.projects-dropdown');if(pd){pd.classList.remove('open');const t=pd.querySelector(':scope>a');if(t)t.setAttribute('aria-expanded','false');const ar=pd.querySelector('.projects-mobile-arrow');if(ar)ar.setAttribute('aria-expanded','false')}};
  const open=()=>{mobile.classList.add('open');backdrop.classList.add('open');nav.classList.add('mobile-open');document.body.classList.add('menu-open');button.setAttribute('aria-expanded','true');button.setAttribute('aria-label','Close menu')};
  button.addEventListener('click',()=>button.getAttribute('aria-expanded')==='true'?close():open());backdrop.addEventListener('click',close);mobile.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{if(a.closest('.projects-dropdown')&&!a.closest('.projects-dropdown-menu'))return;close()}));window.addEventListener('keydown',e=>{if(e.key==='Escape')close()});window.addEventListener('resize',()=>{if(window.innerWidth>900)close()});
 }
