@@ -48,8 +48,7 @@ function logQuotaExceeded(entry) {
 async function request(url, options = {}, attempts = 4) {
   for (let attempt = 0; attempt < attempts; attempt++) {
     const res = await fetch(url, options);
-    if (res.ok) return res;
-
+    if (res.ok || res.status === 204) return res;
     if (res.status === 429) {
       const retryAfterHeader = res.headers.get('retry-after');
       const retryAfter = Number(retryAfterHeader);
@@ -66,7 +65,6 @@ async function request(url, options = {}, attempts = 4) {
       await new Promise(resolve => setTimeout(resolve, wait));
       continue;
     }
-
     if (res.status >= 500) {
       const rawBody = await res.text();
       const retryAfterHeader = res.headers.get('retry-after');
@@ -76,7 +74,6 @@ async function request(url, options = {}, attempts = 4) {
       await new Promise(resolve => setTimeout(resolve, wait));
       continue;
     }
-
     throw new Error(`${res.status} ${await res.text()}`);
   }
   throw new Error(`Request failed after ${attempts} attempts`);
@@ -92,12 +89,11 @@ if (!token.access_token) throw new Error('Spotify token refresh returned no acce
 
 async function spotify(apiPath) {
   const res = await request(`https://api.spotify.com/v1${apiPath}`, { headers: { Authorization: `Bearer ${token.access_token}` } });
+  if (res.status === 204) return null;
   return res.json();
 }
 
-function localDate(date) {
-  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
-}
+function localDate(date) { return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date); }
 function localMonth(date) { return localDate(date).slice(0, 7); }
 function startOfLocalWeek(date) {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
@@ -115,10 +111,12 @@ if (fs.existsSync(historyPath)) { try { history = JSON.parse(fs.readFileSync(his
 history.processed ??= [];
 history.days ??= {};
 
-const authHeaders = { headers: { Authorization: `Bearer ${token.access_token}` } };
 const [recent, currentlyPlaying] = await Promise.all([
   spotify('/me/player/recently-played?limit=50'),
-  spotify('/me/player/currently-playing')
+  spotify('/me/player/currently-playing').catch(error => {
+    console.error('[Spotify] Currently-playing request unavailable:', error?.message || error);
+    return null;
+  })
 ]);
 const processed = new Set(history.processed);
 const now = new Date();
@@ -146,7 +144,6 @@ for (const item of recent.items ?? []) {
 }
 
 history.processed = [...processed].slice(-100000);
-
 const today = localDate(now);
 const monthKey = localMonth(now);
 const weekStart = startOfLocalWeek(now);
@@ -176,15 +173,8 @@ if (currentlyPlaying?.item?.id) {
   const track = currentlyPlaying.item;
   const progressMs = Math.max(0, Number(currentlyPlaying.progress_ms || 0));
   const durationMs = Math.max(progressMs, Number(track.duration_ms || progressMs));
-  const isPlaying = currentlyPlaying.is_playing === true;
-  live = {
-    isPlaying,
-    trackId: track.id,
-    progressMs,
-    durationMs,
-    fetchedAt: now.toISOString()
-  };
-  if (isPlaying && durationMs > 0) {
+  live = { isPlaying: currentlyPlaying.is_playing === true, trackId: track.id, progressMs, durationMs, fetchedAt: now.toISOString() };
+  if (live.isPlaying && durationMs > 0) {
     const liveMinutes = progressMs / 60000;
     dayMinutes += liveMinutes;
     weekMinutes += liveMinutes;
