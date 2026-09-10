@@ -35,6 +35,7 @@ const SMTP_HOST = 'JustPetrov.com';
 const SMTP_PORT = 465;
 const SMTP_USER = 'automail@justpetrov.com';
 const ADMIN_EMAIL = 'ben@justpetrov.com';
+const FROM_NAME = 'Automail | JustPetrov';
 
 function out(bool $ok, string $message = '', array $extra = []): never {
     http_response_code($ok ? 200 : 400);
@@ -105,7 +106,7 @@ function sendAuthMail(string $code, string $location): void {
 
         $body = "(Auth Code)\r\nPage: Spotify Admin Login\r\nOrigin: " . $location . "\r\n\r\nYour authentication code is: " . $code . "\r\nThis code expires in 10 minutes.\r\n";
         $body = preg_replace('/(?m)^\./', '..', $body) ?? $body;
-        $message = "From: JustPetrov Admin <" . SMTP_USER . ">\r\n" .
+        $message = "From: " . FROM_NAME . " <" . SMTP_USER . ">\r\n" .
                    "To: " . ADMIN_EMAIL . "\r\n" .
                    "Subject: Auth Code Requested\r\n" .
                    "Date: " . date(DATE_RFC2822) . "\r\n" .
