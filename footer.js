@@ -14,6 +14,7 @@ footer .contact a:visited{color:var(--gold-bright)!important}
 .worked-slide>a img{cursor:pointer}
 .worked-with-title{width:100%;max-width:100%;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;line-height:1.6!important}
 .worked-slide{contain:layout paint}
+.mobile-menu-toggle{display:none!important}
 .nav nav>a,.nav nav>a.active{background:transparent!important;box-shadow:none!important;border:0!important}
 .nav nav>a:before{content:none!important;display:none!important}
 .nav nav>a.active:after{content:''!important;display:block!important;position:absolute!important;left:0!important;right:0!important;bottom:2px!important;width:auto!important;height:2px!important;background:var(--gold)!important;box-shadow:0 0 10px rgba(167,134,69,.32)!important;border:0!important;border-radius:0!important}
