@@ -1,0 +1,55 @@
+name: One-time Music Stats and Skills fix
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch pages
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('stats/index.html')
+          s = p.read_text()
+          s = s.replace('<body><div class="grain">', '<body class="stats-page"><div class="grain">', 1)
+          marker = '<style>.listening-stats{'
+          css = '<style>body.stats-page .nav nav>a.active,body.stats-page .nav nav>a.active:focus,body.stats-page .nav nav>a.active:focus-visible{background:transparent!important;background-color:transparent!important;box-shadow:none!important;border:0!important;outline:0!important;-webkit-tap-highlight-color:transparent!important}body.stats-page .nav nav>a.active:before{content:none!important;display:none!important}body.stats-page .nav nav>a.active:after{content:""!important;display:block!important;position:absolute!important;left:0!important;right:0!important;bottom:2px!important;width:auto!important;height:2px!important;background:var(--gold)!important;box-shadow:0 0 10px rgba(167,134,69,.32)!important;border:0!important;border-radius:0!important}.listening-stats{'
+          if marker not in s:
+              raise SystemExit('Stats CSS marker not found')
+          s = s.replace(marker, css, 1)
+          p.write_text(s)
+
+          p = Path('skills/index.html')
+          s = p.read_text()
+          replacements = {
+            '<span>10+ Years</span>':'<span data-base-years="10" data-base-year="2026">10+ Years</span>',
+            '<span>6+ Years</span>':'<span data-base-years="6" data-base-year="2026">6+ Years</span>',
+            '<span>4+ Years</span>':'<span data-base-years="4" data-base-year="2026">4+ Years</span>',
+            '<span>3+ Years</span>':'<span data-base-years="3" data-base-year="2026">3+ Years</span>',
+            '<span>1+ Year</span>':'<span data-base-years="1" data-base-year="2026">1+ Year</span>'
+          }
+          for old,new in replacements.items():
+              s=s.replace(old,new)
+          script='''<script>(function(){const year=new Date().getFullYear();document.querySelectorAll(".skill-info span[data-base-years]").forEach(el=>{const base=Number(el.dataset.baseYears);const start=Number(el.dataset.baseYear);if(!Number.isFinite(base)||!Number.isFinite(start))return;const years=base+Math.max(0,year-start);el.textContent=years+"+ Year"+(years===1?"":"s")})})();</script>'''
+          marker='</footer><script src="../footer.js?v=mobile-fix-1"'
+          if marker not in s:
+              raise SystemExit('Skills footer marker not found')
+          s=s.replace(marker,'</footer>'+script+'<script src="../footer.js?v=mobile-fix-1"',1)
+          p.write_text(s)
+          PY
+      - name: Commit changes and remove workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stats/index.html skills/index.html .github/workflows/one-time-stats-skills-fix.yml
+          git commit -m "Fix stats nav and annual skill experience [skip ci]"
+          git push
+          git rm .github/workflows/one-time-stats-skills-fix.yml
+          git commit -m "Remove one-time stats skills workflow [skip ci]"
+          git push
