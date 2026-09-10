@@ -1,8 +1,40 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.resolve(scriptDir, '..');
+const envPath = path.join(rootDir, '.env');
+
+// Load the root .env when running on Cloud86. Existing environment variables
+// (for example GitHub Actions secrets) always take priority.
+if (fs.existsSync(envPath)) {
+  const envText = fs.readFileSync(envPath, 'utf8');
+  for (const rawLine of envText.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+
+    const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (!match) continue;
+
+    const key = match[1];
+    let value = match[2].trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    if (!process.env[key]) process.env[key] = value;
+  }
+}
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
 const refreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
-if (!clientId || !refreshToken) throw new Error('Missing SPOTIFY_CLIENT_ID or SPOTIFY_REFRESH_TOKEN GitHub secret.');
+if (!clientId || !refreshToken) {
+  throw new Error('Missing SPOTIFY_CLIENT_ID or SPOTIFY_REFRESH_TOKEN. Add them to the root .env or provide them as environment variables.');
+}
 
 const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
   method: 'POST',
@@ -16,16 +48,16 @@ const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
 if (!tokenResponse.ok) throw new Error(`Spotify token refresh failed: ${tokenResponse.status} ${await tokenResponse.text()}`);
 const token = await tokenResponse.json();
 
-async function spotify(path) {
-  const res = await fetch(`https://api.spotify.com/v1${path}`, {
+async function spotify(apiPath) {
+  const res = await fetch(`https://api.spotify.com/v1${apiPath}`, {
     headers: { Authorization: `Bearer ${token.access_token}` }
   });
   if (!res.ok) throw new Error(`Spotify API ${res.status}: ${await res.text()}`);
   return res.json();
 }
 
-const dataPath = 'stats/data.json';
-const historyPath = 'stats/listening.json';
+const dataPath = path.join(rootDir, 'stats', 'data.json');
+const historyPath = path.join(rootDir, 'stats', 'listening.json');
 let data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 let history = fs.existsSync(historyPath)
   ? JSON.parse(fs.readFileSync(historyPath, 'utf8'))
