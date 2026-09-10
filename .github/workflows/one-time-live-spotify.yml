@@ -1,0 +1,47 @@
+name: One-time live Spotify stats migration
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable current playback scope
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('stats/petrovskisystem/index.html')
+          s = p.read_text()
+          s = s.replace("const redirectUri=location.origin+location.pathname,scopes='user-read-recently-played user-top-read';", "const redirectUri=location.origin+location.pathname,scopes='user-read-recently-played user-top-read user-read-currently-playing';")
+          p.write_text(s)
+      - name: Make public listening counters live
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('stats/index.html')
+          s = p.read_text()
+          old = "let refreshInFlight=false,lastUpdated='';async function refreshMusicStats(){"
+          if old not in s:
+            raise SystemExit('stats script anchor not found')
+          prefix = "let refreshInFlight=false,lastUpdated='',latestData=null;function liveMinutes(baseMinutes,live){if(!live?.isPlaying)return Number(baseMinutes)||0;const fetched=Date.parse(live.fetchedAt||'');const elapsed=Number.isFinite(fetched)?Math.max(0,Date.now()-fetched):0;const progress=Math.min(Number(live.durationMs)||0,(Number(live.progressMs)||0)+elapsed);const base=Number(baseMinutes)||0;const start=Number(live.progressMs)||0;return base+Math.max(0,progress-start)/60000}function renderLive(){if(!latestData)return;animateListeningValue('listen-day',formatMinutes(liveMinutes(latestData.listeningMinutes?.day,latestData.live)));animateListeningValue('listen-week',formatMinutes(liveMinutes(latestData.listeningMinutes?.week,latestData.live)));animateListeningValue('listen-month',formatMinutes(liveMinutes(latestData.listeningMinutes?.month,latestData.live)))}async function refreshMusicStats(){"
+          s = s.replace(old, prefix, 1)
+          old_tail = "const data=await res.json();renderList('top-artists',data.topArtists);renderList('top-tracks',data.topTracks);animateListeningValue('listen-day',formatMinutes(data.listeningMinutes?.day));animateListeningValue('listen-week',formatMinutes(data.listeningMinutes?.week));animateListeningValue('listen-month',formatMinutes(data.listeningMinutes?.month));document.getElementById('stats-month').textContent=String(data.month||'CURRENT MONTH').toUpperCase();"
+          new_tail = "latestData=await res.json();renderList('top-artists',latestData.topArtists);renderList('top-tracks',latestData.topTracks);renderLive();document.getElementById('stats-month').textContent=String(latestData.month||'CURRENT MONTH').toUpperCase();"
+          if old_tail not in s:
+            raise SystemExit('stats data rendering anchor not found')
+          s = s.replace(old_tail, new_tail, 1)
+          s = s.replace("refreshMusicStats();setInterval(refreshMusicStats,60000);document.addEventListener", "refreshMusicStats();setInterval(refreshMusicStats,60000);setInterval(renderLive,1000);document.addEventListener", 1)
+          p.write_text(s)
+      - name: Commit changes and remove migration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stats/index.html stats/petrovskisystem/index.html .github/workflows/one-time-live-spotify.yml
+          git commit -m "feat: make Spotify listening timer live" || exit 0
+          git rm .github/workflows/one-time-live-spotify.yml
+          git commit -m "chore: remove live Spotify migration"
+          git push
