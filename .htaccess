@@ -9,6 +9,13 @@
     </FilesMatch>
 </IfModule>
 
+# The original Stichting Superhelden PNG is not rendering reliably on the live host.
+# Serve the local SVG replacement instead, while keeping the existing image URL.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^assets/workedwith/stichtingsuperhelden\.png$ /assets/workedwith/stichtingsuperhelden.svg [L]
+</IfModule>
+
 # Never expose the root environment file.
 <FilesMatch "^\.env(?:\.|$)">
     Require all denied
