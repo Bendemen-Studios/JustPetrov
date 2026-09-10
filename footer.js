@@ -71,6 +71,7 @@ footer .contact a:visited{color:var(--gold-bright)!important}
 @media(prefers-reduced-motion:reduce){.worked-track{animation:none;transform:none}}
 `;
 document.head.appendChild(style);
+const cookieStyle=document.createElement('link');cookieStyle.rel='stylesheet';cookieStyle.href='/cookie.css?v=20260910';document.head.appendChild(cookieStyle);
 
 document.querySelectorAll('.footer-meta').forEach(el=>{const text=el.textContent.trim();el.textContent=text.replace(/\b20\d{2}\b\s*$/,'')+' '+new Date().getFullYear()});
 document.querySelectorAll('.worked-with-title').forEach(el=>{el.textContent='I have worked with companies, servers & individuals such as:'});
