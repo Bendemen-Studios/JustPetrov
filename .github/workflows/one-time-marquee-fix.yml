@@ -1,0 +1,47 @@
+name: One-time marquee animation fix
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Force marquee animation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          for name in ['footer.css', 'footer.js']:
+              p = Path(name)
+              s = p.read_text()
+              old = '@media(prefers-reduced-motion:reduce){.worked-track{animation:none;transform:none}}'
+              new = '@media(prefers-reduced-motion:reduce){.worked-track{animation:workedMarquee 22s linear infinite!important;animation-play-state:running!important}}'
+              if old not in s:
+                  raise SystemExit(f'Expected marquee reduced-motion rule not found in {name}')
+              p.write_text(s.replace(old, new, 1))
+
+          p = Path('index.html')
+          s = p.read_text()
+          s = s.replace('/footer.css?v=20260910.3', '/footer.css?v=20260910.4', 1)
+          s = s.replace('/footer.js?v=20260910.3', '/footer.js?v=20260910.4', 1)
+          p.write_text(s)
+          PY
+      - name: Commit changes and remove workflow
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add footer.css footer.js index.html .github/workflows/one-time-marquee-fix.yml
+          git commit -m 'Fix footer marquee animation [skip ci]'
+          git rm .github/workflows/one-time-marquee-fix.yml
+          git commit -m 'Remove one-time marquee workflow [skip ci]'
+          git push
