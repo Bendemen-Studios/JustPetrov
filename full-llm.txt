@@ -1,0 +1,7 @@
+# JustPetrov — Full AI Context
+
+For the canonical expanded AI context, use https://justpetrov.com/llms-full.txt .
+
+Slogan: Together for a Better Tomorrow.
+
+Canonical AI-readable index: https://justpetrov.com/llms.txt
