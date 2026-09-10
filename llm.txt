@@ -1,0 +1,5 @@
+# JustPetrov
+
+> AI-friendly summary: JustPetrov is a Dutch gamer, freelancer and CEO working on Minecraft, gaming, technology, web development and creative projects. Slogan: “Together for a Better Tomorrow”.
+
+See [llms.txt](https://justpetrov.com/llms.txt) for the curated site index and [llms-full.txt](https://justpetrov.com/llms-full.txt) for expanded context.
