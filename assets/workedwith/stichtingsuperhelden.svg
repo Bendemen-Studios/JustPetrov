@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" role="img" aria-labelledby="title desc">
+  <title id="title">Stichting Superhelden</title>
+  <desc id="desc">Logo-style mark for Stichting Superhelden</desc>
+  <g fill="none" stroke="#c8a65a" stroke-width="7" stroke-linejoin="round">
+    <path d="M110 24 126 66 170 68 136 94 147 138 110 113 73 138 84 94 50 68 94 66Z"/>
+    <path d="M65 151c14 25 29 37 45 45 16-8 31-20 45-45"/>
+  </g>
+  <text x="205" y="105" fill="#f2f0e9" font-family="Arial,Helvetica,sans-serif" font-size="46" font-weight="700" letter-spacing="1">Stichting</text>
+  <text x="205" y="158" fill="#c8a65a" font-family="Arial,Helvetica,sans-serif" font-size="46" font-weight="700" letter-spacing="1">Superhelden</text>
+</svg>
