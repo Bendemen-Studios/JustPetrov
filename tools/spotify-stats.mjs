@@ -7,6 +7,7 @@ const rootDir = path.resolve(scriptDir, '..');
 const envPath = path.join(rootDir, '.env');
 const dataPath = path.join(rootDir, 'stats', 'data.json');
 const historyPath = path.join(rootDir, 'stats', 'listening.json');
+const quotaLogPath = path.join(rootDir, 'stats', 'quota-log.json');
 const timeZone = process.env.STATS_TIMEZONE || 'Europe/Amsterdam';
 
 // Load the root .env when running on Cloud86. Existing environment variables
@@ -29,16 +30,67 @@ const clientId = process.env.SPOTIFY_CLIENT_ID;
 const refreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
 if (!clientId || !refreshToken) throw new Error('Missing SPOTIFY_CLIENT_ID or SPOTIFY_REFRESH_TOKEN.');
 
+function logQuotaExceeded(entry) {
+  try {
+    let log = [];
+    if (fs.existsSync(quotaLogPath)) {
+      try { log = JSON.parse(fs.readFileSync(quotaLogPath, 'utf8')); } catch { log = []; }
+    }
+    if (!Array.isArray(log)) log = [];
+    log.push({
+      timestamp: new Date().toISOString(),
+      ...entry
+    });
+    log = log.slice(-100);
+    const temp = `${quotaLogPath}.tmp`;
+    fs.writeFileSync(temp, JSON.stringify(log, null, 2) + '\n');
+    fs.renameSync(temp, quotaLogPath);
+  } catch (error) {
+    console.error('[Spotify] Could not write quota log:', error?.message || error);
+  }
+}
+
 async function request(url, options = {}, attempts = 4) {
   for (let attempt = 0; attempt < attempts; attempt++) {
     const res = await fetch(url, options);
     if (res.ok) return res;
-    if (res.status === 429 || res.status >= 500) {
-      const retryAfter = Number(res.headers.get('retry-after'));
+
+    if (res.status === 429) {
+      const retryAfterHeader = res.headers.get('retry-after');
+      const retryAfter = Number(retryAfterHeader);
+      const rawBody = await res.text();
+      let body = {};
+      try { body = JSON.parse(rawBody); } catch {}
+      const reason = body?.error?.reason || body?.reason || '';
+      const message = body?.error?.message || body?.message || '';
+      const endpoint = new URL(url).pathname;
+
+      console.error(`[Spotify] 429 RATE LIMITED${reason ? ` (${reason})` : ''} ${endpoint}${retryAfterHeader ? ` - retry after ${retryAfterHeader}s` : ''}`);
+      if (reason === 'QUOTA_EXCEEDED') {
+        logQuotaExceeded({
+          status: 429,
+          reason,
+          endpoint,
+          retryAfter: Number.isFinite(retryAfter) ? retryAfter : null,
+          message: message || null,
+          attempt: attempt + 1
+        });
+      }
+
       const wait = Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 15000) : Math.min(1000 * 2 ** attempt, 8000);
       await new Promise(resolve => setTimeout(resolve, wait));
       continue;
     }
+
+    if (res.status >= 500) {
+      const rawBody = await res.text();
+      const retryAfterHeader = res.headers.get('retry-after');
+      const retryAfter = Number(retryAfterHeader);
+      const wait = Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 15000) : Math.min(1000 * 2 ** attempt, 8000);
+      await new Promise(resolve => setTimeout(resolve, wait));
+      continue;
+    }
+
     throw new Error(`${res.status} ${await res.text()}`);
   }
   throw new Error(`Request failed after ${attempts} attempts`);
