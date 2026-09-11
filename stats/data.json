@@ -1,22 +1,30 @@
 {
-  "updated": "2026-09-10T20:01:48.099Z",
+  "updated": "2026-09-11T00:18:40.848Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 252,
-    "week": 452,
-    "month": 452
+    "day": 0,
+    "week": 524,
+    "month": 524
   },
   "live": null,
   "topArtists": [
     {
       "name": "Zara Larsson",
       "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
+    },
+    {
+      "name": "Julien Cohen",
+      "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
     }
   ],
   "topTracks": [
     {
       "name": "Can't Tame Her — Zara Larsson",
       "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
+    },
+    {
+      "name": "Believer — Julien Cohen",
+      "url": "https://open.spotify.com/track/3zDhv2oRfi9eciAB28GztT"
     }
   ]
 }
