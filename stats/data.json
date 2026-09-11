@@ -1,10 +1,10 @@
 {
-  "updated": "2026-09-11T17:08:10.570Z",
+  "updated": "2026-09-11T23:34:46.019Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 143,
-    "week": 668,
-    "month": 668
+    "day": 3,
+    "week": 830,
+    "month": 830
   },
   "live": null,
   "topArtists": [
@@ -15,6 +15,10 @@
     {
       "name": "Julien Cohen",
       "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
+    },
+    {
+      "name": "Alok",
+      "url": "https://open.spotify.com/artist/0NGAZxHanS9e0iNHpR8f2W"
     }
   ],
   "topTracks": [
@@ -25,6 +29,10 @@
     {
       "name": "Believer — Julien Cohen",
       "url": "https://open.spotify.com/track/3zDhv2oRfi9eciAB28GztT"
+    },
+    {
+      "name": "Headlights (feat. KIDDO) - Slowed Version — Alok",
+      "url": "https://open.spotify.com/track/054oMPfh3IRxGQMiwbHT47"
     }
   ]
 }
