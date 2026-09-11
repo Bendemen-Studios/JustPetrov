@@ -97,7 +97,7 @@ document.querySelectorAll('.worked-slider').forEach(slider=>{
  const addSet=(source,hidden=false)=>source.forEach(slide=>{const item=slide.cloneNode(true);if(hidden)item.setAttribute('aria-hidden','true');track.appendChild(item)});
  addSet(slides);addSet(slides,true);
  const fillLoop=()=>{let sets=2;while(track.scrollWidth<slider.clientWidth*2){addSet(base,true);sets++}if(sets%2)addSet(base,true)};
-  slider.replaceChildren(track);fillLoop();
+ slider.replaceChildren(track);fillLoop();
  const canHover=()=>window.matchMedia('(hover:hover) and (pointer:fine)').matches;
  if(canHover())track.style.animationPlayState='running';
  track.addEventListener('pointerenter',e=>{if(canHover()&&e.target.closest('.worked-slide>a'))track.style.animationPlayState='paused'});
@@ -155,4 +155,27 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  const setMeta=(name,content,attr='name')=>{let el=document.head.querySelector(`meta[${attr}="${name}"]`);if(!el){el=document.createElement('meta');el.setAttribute(attr,name);document.head.appendChild(el)}el.setAttribute('content',content)};
  document.title=p.title;setMeta('description',p.description);setMeta('keywords',p.keywords);setMeta('author','JustPetrov');setMeta('robots','index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1');setMeta('og:type',path==='/'?'profile':'website','property');setMeta('og:site_name','JustPetrov','property');setMeta('og:title',p.title,'property');setMeta('og:description',p.description,'property');setMeta('og:url',canonical,'property');setMeta('og:image','https://justpetrov.com/assets/apple-touch-icon.png','property');setMeta('twitter:card','summary','name');setMeta('twitter:title',p.title,'name');setMeta('twitter:description',p.description,'name');setMeta('twitter:image','https://justpetrov.com/assets/apple-touch-icon.png','name');
  let canonicalLink=document.head.querySelector('link[rel="canonical"]');if(!canonicalLink){canonicalLink=document.createElement('link');canonicalLink.rel='canonical';document.head.appendChild(canonicalLink)}canonicalLink.href=canonical;
+})();
+
+// Global worked-with marquee: same slow 42px/s movement and hover/touch pause as Home.
+(()=>{
+ const SPEED=42;
+ const init=()=>document.querySelectorAll('.worked-slider').forEach(slider=>{
+  if(slider.dataset.globalMarquee==='1')return;
+  const source=[...slider.querySelectorAll('.worked-slide')];
+  if(!source.length)return;
+  const unique=[];const seen=new Set();
+  source.forEach(slide=>{const img=slide.querySelector('img');const key=(img?.getAttribute('src')||img?.currentSrc||img?.alt||'').split('?')[0];if(key&&!seen.has(key)){seen.add(key);unique.push(slide.cloneNode(true))}});
+  if(!unique.length)return;
+  const track=document.createElement('div');track.className='worked-track';track.setAttribute('aria-label','Companies and servers');track.style.cssText='display:flex!important;align-items:center!important;width:max-content!important;gap:28px!important;will-change:transform!important;animation:none!important;transform:translate3d(0,0,0)!important;';
+  const addSet=(hidden=false)=>unique.forEach(slide=>{const item=slide.cloneNode(true);if(hidden)item.setAttribute('aria-hidden','true');track.appendChild(item)});
+  addSet(false);addSet(true);slider.replaceChildren(track);slider.dataset.globalMarquee='1';
+  let loopWidth=0,x=0,last=performance.now(),paused=false;
+  const measure=()=>{const items=[...track.children].slice(0,unique.length);const gap=parseFloat(getComputedStyle(track).gap)||0;loopWidth=items.reduce((sum,item)=>sum+item.getBoundingClientRect().width,0)+Math.max(0,items.length-1)*gap+gap;if(loopWidth>0)x=((x%loopWidth)+loopWidth)%loopWidth};
+  const apply=()=>track.style.transform=`translate3d(${x}px,0,0)`;
+  const frame=now=>{const dt=Math.min(50,now-last)/1000;last=now;if(!paused&&loopWidth>0){x-=SPEED*dt;if(x<=-loopWidth)x+=loopWidth;apply()}requestAnimationFrame(frame)};
+  const canHover=()=>window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  slider.addEventListener('mouseenter',()=>{if(canHover())paused=true});slider.addEventListener('mouseleave',()=>{if(canHover())paused=false});slider.addEventListener('touchstart',()=>{paused=true},{passive:true});slider.addEventListener('touchend',()=>{paused=false},{passive:true});window.addEventListener('resize',measure,{passive:true});measure();apply();requestAnimationFrame(frame);
+ });
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
