@@ -1,10 +1,10 @@
 {
-  "updated": "2026-09-12T06:13:12.292Z",
+  "updated": "2026-09-12T10:46:09.116Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 3,
-    "week": 830,
-    "month": 830
+    "day": 100,
+    "week": 927,
+    "month": 927
   },
   "live": null,
   "topArtists": [
@@ -17,8 +17,16 @@
       "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
     },
     {
+      "name": "Clarx",
+      "url": "https://open.spotify.com/artist/0FlpBojQwomu07ckcyz3wr"
+    },
+    {
       "name": "Alok",
       "url": "https://open.spotify.com/artist/0NGAZxHanS9e0iNHpR8f2W"
+    },
+    {
+      "name": "Luude",
+      "url": "https://open.spotify.com/artist/20cmhoGvN0eyzhmsHJH1Mg"
     }
   ],
   "topTracks": [
@@ -31,8 +39,16 @@
       "url": "https://open.spotify.com/track/3zDhv2oRfi9eciAB28GztT"
     },
     {
+      "name": "H.A.Y — Clarx",
+      "url": "https://open.spotify.com/track/3oPRxy48unetVoo046BdFZ"
+    },
+    {
       "name": "Headlights (feat. KIDDO) - Slowed Version — Alok",
       "url": "https://open.spotify.com/track/054oMPfh3IRxGQMiwbHT47"
+    },
+    {
+      "name": "Down Under (feat. Colin Hay) — Luude",
+      "url": "https://open.spotify.com/track/53O5nAlq04RKmSBqW0SFvG"
     }
   ]
 }
