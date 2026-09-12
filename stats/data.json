@@ -1,20 +1,20 @@
 {
-  "updated": "2026-09-12T13:45:37.474Z",
+  "updated": "2026-09-12T16:30:57.055Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 100,
-    "week": 927,
-    "month": 927
+    "day": 191,
+    "week": 1018,
+    "month": 1018
   },
   "live": null,
   "topArtists": [
     {
-      "name": "Zara Larsson",
-      "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
-    },
-    {
       "name": "Julien Cohen",
       "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
+    },
+    {
+      "name": "Zara Larsson",
+      "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
     },
     {
       "name": "Clarx",
@@ -31,12 +31,12 @@
   ],
   "topTracks": [
     {
-      "name": "Can't Tame Her — Zara Larsson",
-      "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
-    },
-    {
       "name": "Believer — Julien Cohen",
       "url": "https://open.spotify.com/track/3zDhv2oRfi9eciAB28GztT"
+    },
+    {
+      "name": "Can't Tame Her — Zara Larsson",
+      "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
     },
     {
       "name": "H.A.Y — Clarx",
