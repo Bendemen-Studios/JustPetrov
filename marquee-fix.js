@@ -3,16 +3,6 @@
     document.querySelectorAll('.worked-slider').forEach(slider=>{
       if(slider.dataset.marqueeClean==='1') return;
 
-      // Always use the canonical root asset on every page. Sub-pages can be
-      // served through different rewrite rules, so relative ../assets URLs
-      // are unnecessarily fragile here. The version query also bypasses a
-      // cached failed PNG response.
-      slider.querySelectorAll('img[src*="stichtingsuperhelden.png"]').forEach(img=>{
-        img.src='/assets/workedwith/stichtingssuperhelden.png?v=20260913';
-        img.loading='eager';
-        img.decoding='async';
-      });
-
       const sourceSlides=[...slider.querySelectorAll('.worked-slide')];
       if(!sourceSlides.length) return;
 
@@ -21,8 +11,6 @@
       sourceSlides.forEach(slide=>{
         const img=slide.querySelector('img');
         if(img){
-          // Logos are part of a moving loop; eager loading prevents lazy images
-          // from disappearing when their cloned copy comes back into view.
           img.loading='eager';
           img.decoding='async';
         }
@@ -46,7 +34,6 @@
         track.appendChild(item);
       });
 
-      // Two identical sets make the end of one set visually identical to the start of the next.
       addSet(false);
       addSet(true);
       slider.replaceChildren(track);
@@ -62,9 +49,7 @@
         const items=[...track.children].slice(0,unique.length);
         const gap=parseFloat(getComputedStyle(track).gap)||0;
         loopWidth=items.reduce((sum,item)=>sum+item.getBoundingClientRect().width,0)+Math.max(0,items.length-1)*gap+gap;
-        if(loopWidth>0){
-          x=((x % loopWidth)+loopWidth)%loopWidth;
-        }
+        if(loopWidth>0) x=((x%loopWidth)+loopWidth)%loopWidth;
       };
 
       const apply=()=>track.style.transform=`translate3d(${x}px,0,0)`;
@@ -73,15 +58,15 @@
         last=now;
         if(!paused && loopWidth>0){
           x-=speed*dt;
-          if(x<=-loopWidth) x+=loopWidth;
+          if(x<=-loopWidth)x+=loopWidth;
           apply();
         }
         requestAnimationFrame(frame);
       };
 
       const canHover=()=>window.matchMedia('(hover:hover) and (pointer:fine)').matches;
-      slider.addEventListener('mouseenter',()=>{ if(canHover()) paused=true; });
-      slider.addEventListener('mouseleave',()=>{ if(canHover()) paused=false; });
+      slider.addEventListener('mouseenter',()=>{if(canHover())paused=true});
+      slider.addEventListener('mouseleave',()=>{if(canHover())paused=false});
       slider.addEventListener('touchstart',()=>{paused=true},{passive:true});
       slider.addEventListener('touchend',()=>{paused=false},{passive:true});
       window.addEventListener('resize',measure,{passive:true});
@@ -91,7 +76,6 @@
       requestAnimationFrame(frame);
     });
   };
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
