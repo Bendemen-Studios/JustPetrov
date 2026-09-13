@@ -3,6 +3,16 @@
     document.querySelectorAll('.worked-slider').forEach(slider=>{
       if(slider.dataset.marqueeClean==='1') return;
 
+      // Always use the canonical root asset on every page. Sub-pages can be
+      // served through different rewrite rules, so relative ../assets URLs
+      // are unnecessarily fragile here. The version query also bypasses a
+      // cached failed PNG response.
+      slider.querySelectorAll('img[src*="stichtingsuperhelden.png"]').forEach(img=>{
+        img.src='/assets/workedwith/stichtingssuperhelden.png?v=20260913';
+        img.loading='eager';
+        img.decoding='async';
+      });
+
       const sourceSlides=[...slider.querySelectorAll('.worked-slide')];
       if(!sourceSlides.length) return;
 
