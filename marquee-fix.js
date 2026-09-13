@@ -10,6 +10,12 @@
       const seen=new Set();
       sourceSlides.forEach(slide=>{
         const img=slide.querySelector('img');
+        if(img){
+          // Logos are part of a moving loop; eager loading prevents lazy images
+          // from disappearing when their cloned copy comes back into view.
+          img.loading='eager';
+          img.decoding='async';
+        }
         const key=(img?.getAttribute('src')||img?.currentSrc||img?.alt||'').split('?')[0];
         if(key && !seen.has(key)){
           seen.add(key);
