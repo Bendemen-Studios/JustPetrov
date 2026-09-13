@@ -1,10 +1,10 @@
 {
-  "updated": "2026-09-12T16:30:57.055Z",
+  "updated": "2026-09-13T00:23:06.941Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 191,
-    "week": 1018,
-    "month": 1018
+    "day": 0,
+    "week": 1142,
+    "month": 1142
   },
   "live": null,
   "topArtists": [
@@ -17,16 +17,16 @@
       "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
     },
     {
+      "name": "Jim Yosef",
+      "url": "https://open.spotify.com/artist/40HDiLfKm0tXk2FxlJx6aO"
+    },
+    {
       "name": "Clarx",
       "url": "https://open.spotify.com/artist/0FlpBojQwomu07ckcyz3wr"
     },
     {
       "name": "Alok",
       "url": "https://open.spotify.com/artist/0NGAZxHanS9e0iNHpR8f2W"
-    },
-    {
-      "name": "Luude",
-      "url": "https://open.spotify.com/artist/20cmhoGvN0eyzhmsHJH1Mg"
     }
   ],
   "topTracks": [
@@ -39,16 +39,16 @@
       "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
     },
     {
+      "name": "Battlecry (Heart of Courage) — Jim Yosef",
+      "url": "https://open.spotify.com/track/0PK9kFwEloZhv7PSs47KlI"
+    },
+    {
       "name": "H.A.Y — Clarx",
       "url": "https://open.spotify.com/track/3oPRxy48unetVoo046BdFZ"
     },
     {
       "name": "Headlights (feat. KIDDO) - Slowed Version — Alok",
       "url": "https://open.spotify.com/track/054oMPfh3IRxGQMiwbHT47"
-    },
-    {
-      "name": "Down Under (feat. Colin Hay) — Luude",
-      "url": "https://open.spotify.com/track/53O5nAlq04RKmSBqW0SFvG"
     }
   ]
 }
