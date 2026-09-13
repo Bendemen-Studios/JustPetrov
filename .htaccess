@@ -7,19 +7,6 @@
         Header set Pragma "no-cache"
         Header set Expires "0"
     </FilesMatch>
-
-    # Do not let a previously cached failed response hide the Stichting logo.
-    <FilesMatch "^stichtingsuperhelden\.png$">
-        Header set Cache-Control "no-cache, must-revalidate"
-        Header set Pragma "no-cache"
-    </FilesMatch>
-</IfModule>
-
-# Serve the Stichting Superhelden logo from the canonical repository asset.
-# This also fixes deployments where the static PNG was not copied correctly.
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteRule ^assets/workedwith/stichtingsuperhelden\.png$ https://raw.githubusercontent.com/Bendemen-Studios/JustPetrov/main/assets/workedwith/stichtingsuperhelden.png [R=302,L]
 </IfModule>
 
 # Never expose the root environment file.
