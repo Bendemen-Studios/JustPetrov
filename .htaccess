@@ -1,11 +1,13 @@
-# Keep HTML, CSS and JavaScript fresh after Git deployments.
-# Browsers revalidate these files so updated versions are picked up without
-# the old automatic reload/flicker behaviour.
+# Always revalidate site documents and scripts after a Git deployment.
+# Versioned asset URLs are preferred, while these headers prevent stale HTML/CSS/JS
+# from being retained by browsers or common reverse proxies.
 <IfModule mod_headers.c>
     <FilesMatch "\.(html?|css|js)$">
-        Header set Cache-Control "no-cache, must-revalidate"
-        Header set Pragma "no-cache"
-        Header set Expires "0"
+        Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0, s-maxage=0"
+        Header always set Pragma "no-cache"
+        Header always set Expires "0"
+        Header always set Surrogate-Control "no-store"
+        Header always set CDN-Cache-Control "no-store"
     </FilesMatch>
 </IfModule>
 
