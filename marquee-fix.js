@@ -3,89 +3,41 @@
     document.querySelectorAll('.worked-slider').forEach(slider=>{
       if(slider.dataset.marqueeClean==='1') return;
 
-      const sourceSlides=[...slider.querySelectorAll('.worked-slide')];
-      if(!sourceSlides.length) return;
+      slider.innerHTML=`
+        <div class="worked-track" aria-label="Companies and servers">
+          <div class="worked-slide"><a href="https://eywamc.com" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/eywamc.png" alt="EywaMC" loading="eager" decoding="async"></a></div>
+          <div class="worked-slide"><a href="https://h20.gg/" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/h20esports.png" alt="H20 Esports" loading="eager" decoding="async"></a></div>
+          <div class="worked-slide"><a href="https://dc.steampunksmp.com" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/steampunksmp.png" alt="Steampunk SMP" loading="eager" decoding="async"></a></div>
+          <div class="worked-slide"><a href="https://www.stichtingsuperhelden.nl/" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/stichtingssuperhelden.png" alt="Stichting Superhelden" loading="eager" decoding="async"></a></div>
+        </div>`;
 
-      const unique=[];
-      const seen=new Set();
-      sourceSlides.forEach(slide=>{
-        const img=slide.querySelector('img');
-        if(img){
-          img.loading='eager';
-          img.decoding='async';
-          if((img.getAttribute('src')||'').includes('stichtingssuperhelden.png')){
-            const fallback='/assets/workedwith/stichtingssuperhelden.png?v=20260913';
-            const useFallback=()=>{
-              if(img.dataset.logoFallback==='1') return;
-              img.dataset.logoFallback='1';
-              img.src=fallback;
-            };
-            img.addEventListener('error',useFallback,{once:true});
-            if(img.complete && img.naturalWidth===0) useFallback();
-          }
-        }
-        const key=(img?.getAttribute('src')||img?.currentSrc||img?.alt||'').split('?')[0];
-        if(key && !seen.has(key)){
-          seen.add(key);
-          unique.push(slide.cloneNode(true));
-        }
-      });
-
-      if(!unique.length) return;
-
-      const track=document.createElement('div');
-      track.className='worked-track';
-      track.setAttribute('aria-label','Companies and servers');
+      const track=slider.querySelector('.worked-track');
+      const base=[...track.children];
       track.style.cssText='display:flex!important;align-items:center!important;width:max-content!important;gap:28px!important;will-change:transform!important;animation:none!important;transform:translate3d(0,0,0)!important;';
+      base.forEach(slide=>slide.querySelector('img')?.setAttribute('draggable','false'));
+      base.forEach(slide=>track.appendChild(slide.cloneNode(true)));
 
-      const addSet=(hidden=false)=>unique.forEach(slide=>{
-        const item=slide.cloneNode(true);
-        if(hidden) item.setAttribute('aria-hidden','true');
-        track.appendChild(item);
-      });
-
-      addSet(false);
-      addSet(true);
-      slider.replaceChildren(track);
-      slider.dataset.marqueeClean='1';
-
-      let loopWidth=0;
-      let x=0;
-      let last=performance.now();
-      let paused=false;
-      const speed=42;
-
+      let loopWidth=0,x=0,last=performance.now(),paused=false;
       const measure=()=>{
-        const items=[...track.children].slice(0,unique.length);
+        const items=[...track.children].slice(0,base.length);
         const gap=parseFloat(getComputedStyle(track).gap)||0;
-        loopWidth=items.reduce((sum,item)=>sum+item.getBoundingClientRect().width,0)+Math.max(0,items.length-1)*gap+gap;
-        if(loopWidth>0) x=((x%loopWidth)+loopWidth)%loopWidth;
+        loopWidth=items.reduce((sum,item)=>sum+item.getBoundingClientRect().width,0)+gap*base.length;
       };
-
       const apply=()=>track.style.transform=`translate3d(${x}px,0,0)`;
       const frame=now=>{
-        const dt=Math.min(50,now-last)/1000;
-        last=now;
-        if(!paused && loopWidth>0){
-          x-=speed*dt;
-          if(x<=-loopWidth)x+=loopWidth;
-          apply();
-        }
+        const dt=Math.min(50,now-last)/1000; last=now;
+        if(!paused&&loopWidth){x-=42*dt;if(x<=-loopWidth)x+=loopWidth;apply()}
         requestAnimationFrame(frame);
       };
-
       const canHover=()=>window.matchMedia('(hover:hover) and (pointer:fine)').matches;
       slider.addEventListener('mouseenter',()=>{if(canHover())paused=true});
       slider.addEventListener('mouseleave',()=>{if(canHover())paused=false});
-      slider.addEventListener('touchstart',()=>{paused=true},{passive:true});
-      slider.addEventListener('touchend',()=>{paused=false},{passive:true});
+      slider.addEventListener('touchstart',()=>paused=true,{passive:true});
+      slider.addEventListener('touchend',()=>paused=false,{passive:true});
       window.addEventListener('resize',measure,{passive:true});
-
-      measure();
-      apply();
-      requestAnimationFrame(frame);
+      slider.dataset.marqueeClean='1';
+      measure();apply();requestAnimationFrame(frame);
     });
   };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
