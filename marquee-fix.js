@@ -13,6 +13,16 @@
         if(img){
           img.loading='eager';
           img.decoding='async';
+          if((img.getAttribute('src')||'').includes('stichtingssuperhelden.png')){
+            const fallback='/assets/workedwith/stichtingssuperhelden.png?v=20260913';
+            const useFallback=()=>{
+              if(img.dataset.logoFallback==='1') return;
+              img.dataset.logoFallback='1';
+              img.src=fallback;
+            };
+            img.addEventListener('error',useFallback,{once:true});
+            if(img.complete && img.naturalWidth===0) useFallback();
+          }
         }
         const key=(img?.getAttribute('src')||img?.currentSrc||img?.alt||'').split('?')[0];
         if(key && !seen.has(key)){
