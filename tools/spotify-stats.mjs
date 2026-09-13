@@ -174,12 +174,6 @@ if (currentlyPlaying?.item?.id) {
   const progressMs = Math.max(0, Number(currentlyPlaying.progress_ms || 0));
   const durationMs = Math.max(progressMs, Number(track.duration_ms || progressMs));
   live = { isPlaying: currentlyPlaying.is_playing === true, trackId: track.id, progressMs, durationMs, fetchedAt: now.toISOString() };
-  if (live.isPlaying && durationMs > 0) {
-    const liveMinutes = progressMs / 60000;
-    dayMinutes += liveMinutes;
-    weekMinutes += liveMinutes;
-    monthMinutes += liveMinutes;
-  }
 }
 
 const topArtists = [...artists.values()].sort((a, b) => b.plays - a.plays).slice(0, 5).map(({ name, url }) => ({ name, url }));
