@@ -8,7 +8,7 @@
           <div class="worked-slide"><a href="https://eywamc.com" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/eywamc.png" alt="EywaMC" loading="eager" decoding="async"></a></div>
           <div class="worked-slide"><a href="https://h20.gg/" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/h20esports.png" alt="H20 Esports" loading="eager" decoding="async"></a></div>
           <div class="worked-slide"><a href="https://dc.steampunksmp.com" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/steampunksmp.png" alt="Steampunk SMP" loading="eager" decoding="async"></a></div>
-          <div class="worked-slide"><a href="https://www.stichtingsuperhelden.nl/" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/stichtingssuperhelden.png" alt="Stichting Superhelden" loading="eager" decoding="async"></a></div>
+          <div class="worked-slide"><a href="https://www.stichtingsuperhelden.nl/" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/stichtingsuperhelden.png" alt="Stichting Superhelden" loading="eager" decoding="async"></a></div>
         </div>`;
 
       const track=slider.querySelector('.worked-track');
