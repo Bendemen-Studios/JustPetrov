@@ -1,12 +1,18 @@
 {
-  "updated": "2026-09-14T16:40:56.546Z",
+  "updated": "2026-09-14T20:33:31.346Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 42,
-    "week": 42,
-    "month": 1399
+    "day": 65,
+    "week": 65,
+    "month": 1422
   },
-  "live": null,
+  "live": {
+    "isPlaying": true,
+    "trackId": "07uuo1yEND3oinbFZnYOvx",
+    "progressMs": 72750,
+    "durationMs": 227440,
+    "fetchedAt": "2026-09-14T20:33:31.346Z"
+  },
   "topArtists": [
     {
       "name": "Julien Cohen",
@@ -25,8 +31,8 @@
       "url": "https://open.spotify.com/artist/0FlpBojQwomu07ckcyz3wr"
     },
     {
-      "name": "Alok",
-      "url": "https://open.spotify.com/artist/0NGAZxHanS9e0iNHpR8f2W"
+      "name": "Kensington",
+      "url": "https://open.spotify.com/artist/5hHcAWKNV84BEbkRnbQ6A7"
     }
   ],
   "topTracks": [
@@ -47,8 +53,8 @@
       "url": "https://open.spotify.com/track/3oPRxy48unetVoo046BdFZ"
     },
     {
-      "name": "Headlights (feat. KIDDO) - Slowed Version — Alok",
-      "url": "https://open.spotify.com/track/054oMPfh3IRxGQMiwbHT47"
+      "name": "Sorry — Kensington",
+      "url": "https://open.spotify.com/track/07uuo1yEND3oinbFZnYOvx"
     }
   ]
 }
