@@ -1,18 +1,12 @@
 {
-  "updated": "2026-09-15T06:41:12.967Z",
+  "updated": "2026-09-15T12:07:11.110Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 3,
-    "week": 129,
-    "month": 1486
+    "day": 26,
+    "week": 152,
+    "month": 1509
   },
-  "live": {
-    "isPlaying": true,
-    "trackId": "07uuo1yEND3oinbFZnYOvx",
-    "progressMs": 223698,
-    "durationMs": 227440,
-    "fetchedAt": "2026-09-15T06:41:12.967Z"
-  },
+  "live": null,
   "topArtists": [
     {
       "name": "Julien Cohen",
