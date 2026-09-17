@@ -1,10 +1,10 @@
 {
-  "updated": "2026-09-17T12:51:55.941Z",
+  "updated": "2026-09-17T17:21:48.629Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 22,
-    "week": 527,
-    "month": 1884
+    "day": 117,
+    "week": 622,
+    "month": 1979
   },
   "live": null,
   "topArtists": [
@@ -13,12 +13,12 @@
       "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
     },
     {
-      "name": "Zara Larsson",
-      "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
-    },
-    {
       "name": "Kensington",
       "url": "https://open.spotify.com/artist/5hHcAWKNV84BEbkRnbQ6A7"
+    },
+    {
+      "name": "Zara Larsson",
+      "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
     },
     {
       "name": "Jim Yosef",
@@ -35,12 +35,12 @@
       "url": "https://open.spotify.com/track/3zDhv2oRfi9eciAB28GztT"
     },
     {
-      "name": "Can't Tame Her — Zara Larsson",
-      "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
-    },
-    {
       "name": "Sorry — Kensington",
       "url": "https://open.spotify.com/track/07uuo1yEND3oinbFZnYOvx"
+    },
+    {
+      "name": "Can't Tame Her — Zara Larsson",
+      "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
     },
     {
       "name": "Battlecry (Heart of Courage) — Jim Yosef",
