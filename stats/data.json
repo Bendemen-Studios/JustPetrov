@@ -1,12 +1,18 @@
 {
-  "updated": "2026-09-18T17:46:06.412Z",
+  "updated": "2026-09-18T20:07:26.884Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 33,
-    "week": 723,
-    "month": 2081
+    "day": 137,
+    "week": 828,
+    "month": 2185
   },
-  "live": null,
+  "live": {
+    "isPlaying": true,
+    "trackId": "2CYXttmf0SMgzJ0lODtnBT",
+    "progressMs": 108049,
+    "durationMs": 202170,
+    "fetchedAt": "2026-09-18T20:07:26.884Z"
+  },
   "topArtists": [
     {
       "name": "Julien Cohen",
@@ -25,8 +31,8 @@
       "url": "https://open.spotify.com/artist/40HDiLfKm0tXk2FxlJx6aO"
     },
     {
-      "name": "Clarx",
-      "url": "https://open.spotify.com/artist/0FlpBojQwomu07ckcyz3wr"
+      "name": "Showtek",
+      "url": "https://open.spotify.com/artist/3gk0OYeLFWYupGFRHqLSR7"
     }
   ],
   "topTracks": [
@@ -47,8 +53,8 @@
       "url": "https://open.spotify.com/track/0PK9kFwEloZhv7PSs47KlI"
     },
     {
-      "name": "H.A.Y — Clarx",
-      "url": "https://open.spotify.com/track/3oPRxy48unetVoo046BdFZ"
+      "name": "Cannonball - Radio Edit — Showtek",
+      "url": "https://open.spotify.com/track/2CYXttmf0SMgzJ0lODtnBT"
     }
   ]
 }
