@@ -1,10 +1,10 @@
 {
-  "updated": "2026-09-19T09:27:19.453Z",
+  "updated": "2026-09-19T13:15:53.028Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 67,
-    "week": 1006,
-    "month": 2364
+    "day": 171,
+    "week": 1111,
+    "month": 2468
   },
   "live": null,
   "topArtists": [
@@ -21,12 +21,12 @@
       "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
     },
     {
-      "name": "Jim Yosef",
-      "url": "https://open.spotify.com/artist/40HDiLfKm0tXk2FxlJx6aO"
-    },
-    {
       "name": "Showtek",
       "url": "https://open.spotify.com/artist/3gk0OYeLFWYupGFRHqLSR7"
+    },
+    {
+      "name": "Jim Yosef",
+      "url": "https://open.spotify.com/artist/40HDiLfKm0tXk2FxlJx6aO"
     }
   ],
   "topTracks": [
@@ -43,12 +43,12 @@
       "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
     },
     {
-      "name": "Battlecry (Heart of Courage) — Jim Yosef",
-      "url": "https://open.spotify.com/track/0PK9kFwEloZhv7PSs47KlI"
-    },
-    {
       "name": "Cannonball - Radio Edit — Showtek",
       "url": "https://open.spotify.com/track/2CYXttmf0SMgzJ0lODtnBT"
+    },
+    {
+      "name": "Battlecry (Heart of Courage) — Jim Yosef",
+      "url": "https://open.spotify.com/track/0PK9kFwEloZhv7PSs47KlI"
     }
   ]
 }
