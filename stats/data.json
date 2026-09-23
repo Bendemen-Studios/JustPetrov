@@ -1,19 +1,17 @@
 {
-  "updated": "2026-09-23T18:29:52.848Z",
+  "updated": "2026-09-23T21:40:52.984Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 130,
-    "week": 316,
-    "month": 2938
+    "day": 222,
+    "week": 407,
+    "month": 3030
   },
-  "live": {
-    "isPlaying": true,
-    "trackId": "3JfHYZKy5JmE5Fv4gDTCiz",
-    "progressMs": 169500,
-    "durationMs": 199131,
-    "fetchedAt": "2026-09-23T18:29:52.848Z"
-  },
+  "live": null,
   "topArtists": [
+    {
+      "name": "Wulf",
+      "url": "https://open.spotify.com/artist/134sCDSe1w2zPnfCG4hT0f"
+    },
     {
       "name": "Julien Cohen",
       "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
@@ -21,10 +19,6 @@
     {
       "name": "Kensington",
       "url": "https://open.spotify.com/artist/5hHcAWKNV84BEbkRnbQ6A7"
-    },
-    {
-      "name": "Wulf",
-      "url": "https://open.spotify.com/artist/134sCDSe1w2zPnfCG4hT0f"
     },
     {
       "name": "Zara Larsson",
@@ -37,16 +31,16 @@
   ],
   "topTracks": [
     {
+      "name": "Mind Made Up — Wulf",
+      "url": "https://open.spotify.com/track/6SQTg3WPkb96wdYWKLj7id"
+    },
+    {
       "name": "Believer — Julien Cohen",
       "url": "https://open.spotify.com/track/3zDhv2oRfi9eciAB28GztT"
     },
     {
       "name": "Sorry — Kensington",
       "url": "https://open.spotify.com/track/07uuo1yEND3oinbFZnYOvx"
-    },
-    {
-      "name": "Mind Made Up — Wulf",
-      "url": "https://open.spotify.com/track/6SQTg3WPkb96wdYWKLj7id"
     },
     {
       "name": "Can't Tame Her — Zara Larsson",
