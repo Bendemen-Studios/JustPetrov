@@ -1,12 +1,18 @@
 {
-  "updated": "2026-09-24T07:55:26.169Z",
+  "updated": "2026-09-24T13:01:13.114Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 14,
-    "week": 422,
-    "month": 3044
+    "day": 157,
+    "week": 565,
+    "month": 3187
   },
-  "live": null,
+  "live": {
+    "isPlaying": true,
+    "trackId": "7MOX3ibncypw3xGb4HZVFA",
+    "progressMs": 44638,
+    "durationMs": 223266,
+    "fetchedAt": "2026-09-24T13:01:13.114Z"
+  },
   "topArtists": [
     {
       "name": "Wulf",
