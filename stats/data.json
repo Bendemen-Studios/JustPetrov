@@ -1,17 +1,17 @@
 {
-  "updated": "2026-09-25T06:49:17.385Z",
+  "updated": "2026-09-25T12:24:18.266Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 57,
-    "week": 988,
-    "month": 3610
+    "day": 241,
+    "week": 1171,
+    "month": 3793
   },
   "live": {
     "isPlaying": true,
-    "trackId": "3eOeuofLjOgjOCs7eWuvZ0",
-    "progressMs": 56347,
-    "durationMs": 215878,
-    "fetchedAt": "2026-09-25T06:49:17.385Z"
+    "trackId": "0W4Kpfp1w2xkY3PrV714B7",
+    "progressMs": 90700,
+    "durationMs": 163133,
+    "fetchedAt": "2026-09-25T12:24:18.266Z"
   },
   "topArtists": [
     {
@@ -19,12 +19,12 @@
       "url": "https://open.spotify.com/artist/134sCDSe1w2zPnfCG4hT0f"
     },
     {
-      "name": "Julien Cohen",
-      "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
-    },
-    {
       "name": "Kensington",
       "url": "https://open.spotify.com/artist/5hHcAWKNV84BEbkRnbQ6A7"
+    },
+    {
+      "name": "Julien Cohen",
+      "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
     },
     {
       "name": "Zara Larsson",
