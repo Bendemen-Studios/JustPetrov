@@ -1,18 +1,12 @@
 {
-  "updated": "2026-09-25T20:35:21.374Z",
+  "updated": "2026-09-25T23:31:49.728Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 475,
-    "week": 1406,
-    "month": 4028
+    "day": 0,
+    "week": 1459,
+    "month": 4082
   },
-  "live": {
-    "isPlaying": true,
-    "trackId": "3eOeuofLjOgjOCs7eWuvZ0",
-    "progressMs": 11989,
-    "durationMs": 215878,
-    "fetchedAt": "2026-09-25T20:35:21.374Z"
-  },
+  "live": null,
   "topArtists": [
     {
       "name": "Wulf",
@@ -31,8 +25,8 @@
       "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
     },
     {
-      "name": "Showtek",
-      "url": "https://open.spotify.com/artist/3gk0OYeLFWYupGFRHqLSR7"
+      "name": "Echosmith",
+      "url": "https://open.spotify.com/artist/1PbBg2aYjWLKRk84zJK15x"
     }
   ],
   "topTracks": [
@@ -53,8 +47,8 @@
       "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
     },
     {
-      "name": "Cannonball - Radio Edit — Showtek",
-      "url": "https://open.spotify.com/track/2CYXttmf0SMgzJ0lODtnBT"
+      "name": "Cool Kids — Echosmith",
+      "url": "https://open.spotify.com/track/3eOeuofLjOgjOCs7eWuvZ0"
     }
   ]
 }
