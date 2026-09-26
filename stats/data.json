@@ -1,17 +1,17 @@
 {
-  "updated": "2026-09-26T07:03:59.224Z",
+  "updated": "2026-09-26T12:12:31.046Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 0,
-    "week": 1459,
-    "month": 4082
+    "day": 148,
+    "week": 1608,
+    "month": 4230
   },
   "live": {
     "isPlaying": true,
-    "trackId": "6hC1xBNYMVK4acdnEXaZVD",
-    "progressMs": 232957,
-    "durationMs": 274866,
-    "fetchedAt": "2026-09-26T07:03:59.224Z"
+    "trackId": "3eOeuofLjOgjOCs7eWuvZ0",
+    "progressMs": 121737,
+    "durationMs": 215878,
+    "fetchedAt": "2026-09-26T12:12:31.046Z"
   },
   "topArtists": [
     {
@@ -27,12 +27,12 @@
       "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
     },
     {
-      "name": "Zara Larsson",
-      "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
-    },
-    {
       "name": "Echosmith",
       "url": "https://open.spotify.com/artist/1PbBg2aYjWLKRk84zJK15x"
+    },
+    {
+      "name": "Zara Larsson",
+      "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
     }
   ],
   "topTracks": [
@@ -49,12 +49,12 @@
       "url": "https://open.spotify.com/track/07uuo1yEND3oinbFZnYOvx"
     },
     {
-      "name": "Can't Tame Her — Zara Larsson",
-      "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
-    },
-    {
       "name": "Cool Kids — Echosmith",
       "url": "https://open.spotify.com/track/3eOeuofLjOgjOCs7eWuvZ0"
+    },
+    {
+      "name": "Can't Tame Her — Zara Larsson",
+      "url": "https://open.spotify.com/track/4vOoQh9MhS9pyrbvc8LyMz"
     }
   ]
 }
