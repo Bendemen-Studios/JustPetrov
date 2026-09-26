@@ -1,19 +1,23 @@
 {
-  "updated": "2026-09-26T12:12:31.046Z",
+  "updated": "2026-09-26T16:21:52.432Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 148,
-    "week": 1608,
-    "month": 4230
+    "day": 328,
+    "week": 1788,
+    "month": 4410
   },
   "live": {
     "isPlaying": true,
     "trackId": "3eOeuofLjOgjOCs7eWuvZ0",
-    "progressMs": 121737,
+    "progressMs": 126239,
     "durationMs": 215878,
-    "fetchedAt": "2026-09-26T12:12:31.046Z"
+    "fetchedAt": "2026-09-26T16:21:52.432Z"
   },
   "topArtists": [
+    {
+      "name": "Echosmith",
+      "url": "https://open.spotify.com/artist/1PbBg2aYjWLKRk84zJK15x"
+    },
     {
       "name": "Wulf",
       "url": "https://open.spotify.com/artist/134sCDSe1w2zPnfCG4hT0f"
@@ -27,15 +31,15 @@
       "url": "https://open.spotify.com/artist/5Vbvd3Kt55DbpHNTcA3wRG"
     },
     {
-      "name": "Echosmith",
-      "url": "https://open.spotify.com/artist/1PbBg2aYjWLKRk84zJK15x"
-    },
-    {
       "name": "Zara Larsson",
       "url": "https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg"
     }
   ],
   "topTracks": [
+    {
+      "name": "Cool Kids — Echosmith",
+      "url": "https://open.spotify.com/track/3eOeuofLjOgjOCs7eWuvZ0"
+    },
     {
       "name": "Mind Made Up — Wulf",
       "url": "https://open.spotify.com/track/6SQTg3WPkb96wdYWKLj7id"
@@ -47,10 +51,6 @@
     {
       "name": "Sorry — Kensington",
       "url": "https://open.spotify.com/track/07uuo1yEND3oinbFZnYOvx"
-    },
-    {
-      "name": "Cool Kids — Echosmith",
-      "url": "https://open.spotify.com/track/3eOeuofLjOgjOCs7eWuvZ0"
     },
     {
       "name": "Can't Tame Her — Zara Larsson",
