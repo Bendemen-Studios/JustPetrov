@@ -3,7 +3,7 @@ const links={
  'eywamc.png':'https://eywamc.com',
  'h20esports.png':'https://h20.gg/',
  'diehardsmp.png':'https://discord.diehardsmp.com',
- 'stichtingsuperhelden.png':'https://www.stichtingsuperhelden.nl/',
+ 'stichtingsuperhelden.svg':'https://www.stichtingsuperhelden.nl/',
  'steampunksmp.png':'https://dc.steampunksmp.com'
 };
 const style=document.createElement('style');
@@ -29,8 +29,8 @@ footer .contact a:visited{color:var(--gold-bright)!important}
 .projects-mobile-arrow{display:none}
 .nav nav .projects-dropdown>a{height:100%;display:flex;align-items:center;text-decoration:none}
 @media(max-width:900px){.projects-dropdown>a{padding-right:48px!important}.projects-mobile-arrow{display:flex!important;position:absolute!important;right:0!important;top:0!important;width:42px!important;height:52px!important;align-items:center!important;justify-content:center!important;padding:0!important;border:0!important;border-bottom:1px solid var(--line-soft)!important;background:transparent!important;color:var(--gold-bright)!important;font:700 15px/1 'Space Mono',monospace!important;cursor:pointer!important;z-index:2}.projects-mobile-arrow:after{content:'⌄';transition:transform .2s ease}.projects-dropdown.open .projects-mobile-arrow:after{transform:rotate(180deg)}}
-.worked-slide img[src*="stichtingsuperhelden.png"]{width:180px;max-width:180px;height:70px;max-height:70px;object-fit:contain;object-position:center;background:transparent;mix-blend-mode:screen}
-.worked-slide img[src*="stichtingsuperhelden.png"]:hover{transform:scale(1.04)}
+.worked-slide img[src*="stichtingsuperhelden.svg"]{width:180px;max-width:180px;height:70px;max-height:70px;object-fit:contain;object-position:center;background:transparent;mix-blend-mode:screen}
+.worked-slide img[src*="stichtingsuperhelden.svg"]:hover{transform:scale(1.04)}
 @media(max-width:900px){
  html,body{max-width:100%;overflow-x:hidden}
  .nav{height:72px!important;padding:0 18px!important;display:block!important}
@@ -56,7 +56,7 @@ footer .contact a:visited{color:var(--gold-bright)!important}
  .projects-dropdown.open .projects-dropdown-menu a{border-bottom:0!important;padding:12px 0!important;font-size:11px!important}
  .worked-with{padding:22px 0 8px;min-width:0!important;width:100%!important;max-width:100%!important}
  .worked-with-title{font-size:9px!important;letter-spacing:.13em!important;white-space:normal!important;line-height:1.65!important;max-width:100%!important;width:100%!important;padding-right:4px;box-sizing:border-box}
- .worked-slider{height:92px}.worked-track{gap:18px;animation-duration:22s}.worked-slide{width:145px;height:72px;opacity:1}.worked-slide img{max-width:135px;max-height:56px}.worked-slide img[src*="stichtingsuperhelden.png"]{width:135px;max-width:135px;height:56px;max-height:56px}
+ .worked-slider{height:92px}.worked-track{gap:18px;animation-duration:22s}.worked-slide{width:145px;height:72px;opacity:1}.worked-slide img{max-width:135px;max-height:56px}.worked-slide img[src*="stichtingsuperhelden.svg"]{width:135px;max-width:135px;height:56px;max-height:56px}
  main,footer{width:calc(100% - 36px);max-width:100%}
  footer{grid-template-columns:minmax(0,1fr)!important;gap:0;padding-bottom:36px!important;min-width:0!important;overflow:hidden!important}
  footer .footer-meta{text-align:left!important;padding-top:6px!important}
@@ -70,7 +70,7 @@ footer .contact a:visited{color:var(--gold-bright)!important}
 }
 @media(max-width:480px){
  main,footer{width:calc(100% - 28px)}.nav .brand{width:140px}.nav .brand img{width:140px}.mobile-menu-toggle{left:14px}.page-hero{padding-top:142px}.page-hero h1{font-size:clamp(62px,18vw,105px)}
- .worked-slide{width:125px!important}.worked-slide img{max-width:120px!important}.worked-slide img[src*="stichtingsuperhelden.png"]{width:120px;max-width:120px;height:56px;max-height:56px}.worked-slider:before,.worked-slider:after{width:20%}
+ .worked-slide{width:125px!important}.worked-slide img{max-width:120px!important}.worked-slide img[src*="stichtingsuperhelden.svg"]{width:120px;max-width:120px;height:56px;max-height:56px}.worked-slider:before,.worked-slider:after{width:20%}
 }
 @media(prefers-reduced-motion:reduce){.worked-track{animation:workedMarquee 22s linear infinite!important;animation-play-state:running!important}.worked-slide{animation:none;opacity:1}}
 `;
