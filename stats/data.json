@@ -1,12 +1,18 @@
 {
-  "updated": "2026-09-28T12:18:03.644Z",
+  "updated": "2026-09-28T19:45:19.043Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 169,
-    "week": 169,
-    "month": 4907
+    "day": 187,
+    "week": 187,
+    "month": 4925
   },
-  "live": null,
+  "live": {
+    "isPlaying": true,
+    "trackId": "3CRDbSIZ4r5MsZ0YwxuEkn",
+    "progressMs": 105027,
+    "durationMs": 202333,
+    "fetchedAt": "2026-09-28T19:45:19.043Z"
+  },
   "topArtists": [
     {
       "name": "Echosmith",
