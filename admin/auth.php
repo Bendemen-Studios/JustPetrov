@@ -43,7 +43,92 @@ function originLocation(): string { $ip=clientIp(); if($ip==='unknown'||filter_v
 function smtpRead($fp): string { $r=''; while(($line=fgets($fp,515))!==false){$r.=$line;if(strlen($line)<4||$line[3]!=='-')break;}return$r; }
 function smtpExpect($fp,int $code): void { $r=smtpRead($fp);if((int)substr($r,0,3)!==$code)throw new RuntimeException('SMTP error: '.trim($r)); }
 function smtpCommand($fp,string $command,int $code): void { fwrite($fp,$command."\r\n");smtpExpect($fp,$code); }
-function sendAuthMail(string $code,string $location): void { $password=getenv('SMTP_PASS')?:'';if($password==='')throw new RuntimeException('SMTP_PASS is not configured on the server.');$fp=@stream_socket_client('ssl://'.SMTP_HOST.':'.SMTP_PORT,$errno,$errstr,10,STREAM_CLIENT_CONNECT);if(!$fp)throw new RuntimeException('SMTP connection failed: '.$errstr);stream_set_timeout($fp,10);try{smtpExpect($fp,220);smtpCommand($fp,'EHLO justpetrov.com',250);smtpCommand($fp,'AUTH LOGIN',334);smtpCommand($fp,base64_encode(SMTP_USER),334);smtpCommand($fp,base64_encode($password),235);smtpCommand($fp,'MAIL FROM:<'.SMTP_USER.'>',250);smtpCommand($fp,'RCPT TO:<'.ADMIN_EMAIL.'>',250);fwrite($fp,"DATA\r\n");smtpExpect($fp,354);$body="Reden: Admin Toegang\r\nPage: Admin Dashboard Login\r\nOrigin: ".$location."\r\n\r\nYour authentication code is: ".$code."\r\nThis code expires in 10 minutes.\r\n";$body=preg_replace('/(?m)^\./','..',$body)??$body;$htmlBody='<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5"><p>Reden: Admin Toegang<br>Page: Admin Dashboard Login<br>Origin: '.htmlspecialchars($location,ENT_QUOTES,'UTF-8').'</p><p><strong>Your authentication code is: '.htmlspecialchars($code,ENT_QUOTES,'UTF-8').'</strong><br>This code expires in 10 minutes.</p><p style="margin-top:24px"><img src="cid:automail-signature" alt="Automail signature" width="100%" style="display:block;max-width:100%;height:auto"></p></div>';$boundary='=_JustPetrov_'.bin2hex(random_bytes(8));$message="From: ".FROM_NAME." <".SMTP_USER.">\r\nTo: ".ADMIN_EMAIL."\r\nSubject: Admin Code Requested\r\nDate: ".date(DATE_RFC2822)."\r\nMIME-Version: 1.0\r\nContent-Type: multipart/related; boundary=\"".$boundary."\"\r\n\r\n--".$boundary."\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n\r\n".$body."\r\n--".$boundary."\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n\r\n".$htmlBody."\r\n--".$boundary."\r\nContent-Type: image/png; name="automail-header.png"\r\nContent-Transfer-Encoding: base64\r\nContent-ID: <automail-header>\r\nContent-Disposition: inline; filename="automail-header.png"\r\n\r\n".base64_encode(file_get_contents(dirname(__DIR__).'/assets/automail-header.png'))."\r\n--".$boundary."\r\nContent-Type: image/png; name="automail-signature.png"\r\nContent-Transfer-Encoding: base64\r\nContent-ID: <automail-signature>\r\nContent-Disposition: inline; filename="automail-signature.png"\r\n\r\n".base64_encode(file_get_contents(dirname(__DIR__).'/assets/automail-signature.png'))."\r\n--".$boundary."--\r\n";fwrite($fp,$message."\r\n.\r\n");smtpExpect($fp,250);fwrite($fp,"QUIT\r\n");}finally{fclose($fp);} }
+function sendAuthMail(string $code,string $location): void {
+    $password = getenv('SMTP_PASS') ?: '';
+    if ($password === '') throw new RuntimeException('SMTP_PASS is not configured on the server.');
+
+    $headerPath = dirname(__DIR__) . '/assets/automail-header.png';
+    $signaturePath = dirname(__DIR__) . '/assets/automail-signature.png';
+    if (!is_readable($headerPath) || !is_readable($signaturePath)) {
+        throw new RuntimeException('Automail header/signature image is missing or unreadable.');
+    }
+
+    $fp = @stream_socket_client('ssl://' . SMTP_HOST . ':' . SMTP_PORT, $errno, $errstr, 10, STREAM_CLIENT_CONNECT);
+    if (!$fp) throw new RuntimeException('SMTP connection failed: ' . $errstr);
+
+    stream_set_timeout($fp, 10);
+
+    try {
+        smtpExpect($fp, 220);
+        smtpCommand($fp, 'EHLO justpetrov.com', 250);
+        smtpCommand($fp, 'AUTH LOGIN', 334);
+        smtpCommand($fp, base64_encode(SMTP_USER), 334);
+        smtpCommand($fp, base64_encode($password), 235);
+        smtpCommand($fp, 'MAIL FROM:<' . SMTP_USER . '>', 250);
+        smtpCommand($fp, 'RCPT TO:<' . ADMIN_EMAIL . '>', 250);
+
+        fwrite($fp, "DATA\r\n");
+        smtpExpect($fp, 354);
+
+        $safeLocation = htmlspecialchars($location, ENT_QUOTES, 'UTF-8');
+        $safeCode = htmlspecialchars($code, ENT_QUOTES, 'UTF-8');
+
+        $body = "Reden: Admin Toegang\r\n"
+            . "Page: Admin Dashboard Login\r\n"
+            . "Origin: " . $location . "\r\n\r\n"
+            . "Your authentication code is: " . $code . "\r\n"
+            . "This code expires in 10 minutes.\r\n";
+
+        $headerCid = 'automail-header';
+        $signatureCid = 'automail-signature';
+
+        $htmlBody = '<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5">'
+            . '<p style="margin:0 0 20px"><img src="cid:' . $headerCid . '" alt="Automail" width="100%" style="display:block;width:100%;max-width:100%;height:auto"></p>'
+            . '<p>Reden: Admin Toegang<br>Page: Admin Dashboard Login<br>Origin: ' . $safeLocation . '</p>'
+            . '<p><strong>Your authentication code is: ' . $safeCode . '</strong><br>This code expires in 10 minutes.</p>'
+            . '<p style="margin:28px 0 0"><img src="cid:' . $signatureCid . '" alt="Automail signature" width="100%" style="display:block;width:100%;max-width:100%;height:auto"></p>'
+            . '</div>';
+
+        $boundary = '=_JustPetrov_' . bin2hex(random_bytes(8));
+        $headerData = base64_encode((string) file_get_contents($headerPath));
+        $signatureData = base64_encode((string) file_get_contents($signaturePath));
+
+        $message = "From: " . FROM_NAME . " <" . SMTP_USER . ">\r\n"
+            . "To: " . ADMIN_EMAIL . "\r\n"
+            . "Subject: Admin Code Requested\r\n"
+            . "Date: " . date(DATE_RFC2822) . "\r\n"
+            . "MIME-Version: 1.0\r\n"
+            . "Content-Type: multipart/related; boundary=\"" . $boundary . "\"\r\n"
+            . "\r\n"
+            . "--" . $boundary . "\r\n"
+            . "Content-Type: text/plain; charset=UTF-8\r\n"
+            . "Content-Transfer-Encoding: 8bit\r\n\r\n"
+            . $body . "\r\n"
+            . "--" . $boundary . "\r\n"
+            . "Content-Type: text/html; charset=UTF-8\r\n"
+            . "Content-Transfer-Encoding: 8bit\r\n\r\n"
+            . $htmlBody . "\r\n"
+            . "--" . $boundary . "\r\n"
+            . "Content-Type: image/png; name=\"automail-header.png\"\r\n"
+            . "Content-Transfer-Encoding: base64\r\n"
+            . "Content-ID: <" . $headerCid . ">\r\n"
+            . "Content-Disposition: inline; filename=\"automail-header.png\"\r\n\r\n"
+            . $headerData . "\r\n"
+            . "--" . $boundary . "\r\n"
+            . "Content-Type: image/png; name=\"automail-signature.png\"\r\n"
+            . "Content-Transfer-Encoding: base64\r\n"
+            . "Content-ID: <" . $signatureCid . ">\r\n"
+            . "Content-Disposition: inline; filename=\"automail-signature.png\"\r\n\r\n"
+            . $signatureData . "\r\n"
+            . "--" . $boundary . "--\r\n";
+
+        fwrite($fp, $message . "\r\n.\r\n");
+        smtpExpect($fp, 250);
+        fwrite($fp, "QUIT\r\n");
+    } finally {
+        fclose($fp);
+    }
+}
 
 $action=(string)($_GET['action']??'');$data=input();$passwordHash=getenv('ADMIN_PASSWORD_HASH')?:'';
 if($action==='status'){if(!empty($_SESSION['authenticated']) && !empty($_SESSION['authenticated_expires']) && time() < (int)$_SESSION['authenticated_expires'])out(true,'',['authenticated'=>true,'expiresAt'=>(int)$_SESSION['authenticated_expires']]);out(true,'',['authenticated'=>false]);}
