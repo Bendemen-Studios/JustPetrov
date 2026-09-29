@@ -69,8 +69,9 @@ function requestJson(string $url, array $options = []): array|int {
         CURLOPT_HEADER => true,
         CURLOPT_CONNECTTIMEOUT => 8,
         CURLOPT_TIMEOUT => 15,
-        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_FOLLOWLOCATION => ($options['follow_redirects'] ?? true),
         CURLOPT_HTTPHEADER => $options['headers'] ?? [],
+        CURLOPT_CUSTOMREQUEST => $options['method'] ?? 'GET',
         CURLOPT_POST => ($options['method'] ?? 'GET') === 'POST',
         CURLOPT_POSTFIELDS => $options['body'] ?? null,
     ]);
@@ -95,7 +96,10 @@ function requestJson(string $url, array $options = []): array|int {
         throw new RuntimeException("Spotify quota exceeded (HTTP 429).");
     }
     if ($status < 200 || $status >= 300) {
-        throw new RuntimeException("Spotify API returned HTTP {$status}: " . substr((string) $body, 0, 500));
+        $endpoint = (string) (parse_url($url, PHP_URL_PATH) ?: $url);
+        $method = strtoupper((string) ($options['method'] ?? 'GET'));
+        $message = trim((string) $body);
+        throw new RuntimeException("Spotify API returned HTTP {$status} for {$method} {$endpoint}: " . substr($message, 0, 500));
     }
     $json = json_decode((string) $body, true);
     if (!is_array($json)) {
