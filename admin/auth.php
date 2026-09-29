@@ -38,8 +38,49 @@ const QUOTA_LOG = __DIR__ . '/../stats/quota-log.json';
 
 function out(bool $ok,string $message='',array $extra=[]): never { http_response_code($ok?200:400); echo json_encode(array_merge(['ok'=>$ok,'message'=>$message],$extra),JSON_UNESCAPED_SLASHES); exit; }
 function input(): array { $d=json_decode(file_get_contents('php://input') ?: '{}',true); return is_array($d)?$d:[]; }
-function clientIp(): string { return $_SERVER['REMOTE_ADDR'] ?? 'unknown'; }
-function originLocation(): string { $ip=clientIp(); if($ip==='unknown'||filter_var($ip,FILTER_VALIDATE_IP)===false)return'Unknown'; $ctx=stream_context_create(['http'=>['timeout'=>3,'ignore_errors'=>true]]); $json=@file_get_contents('https://ipapi.co/'.rawurlencode($ip).'/json/',false,$ctx); $d=$json?json_decode($json,true):null; if(!is_array($d))return'Unknown'; $city=trim((string)($d['city']??''));$country=trim((string)($d['country_name']??''));return trim($country.($city!==''&&$country!==''?' — ':'').$city)?:'Unknown'; }
+function clientIp(): string {
+    $candidates = [];
+    if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) $candidates[] = $_SERVER['HTTP_CF_CONNECTING_IP'];
+    if (!empty($_SERVER['HTTP_X_REAL_IP'])) $candidates[] = $_SERVER['HTTP_X_REAL_IP'];
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        foreach (explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']) as $forwarded) $candidates[] = trim($forwarded);
+    }
+    $candidates[] = $_SERVER['REMOTE_ADDR'] ?? '';
+
+    foreach ($candidates as $ip) {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) return $ip;
+    }
+    foreach ($candidates as $ip) {
+        if (filter_var($ip, FILTER_VALIDATE_IP)) return $ip;
+    }
+    return 'unknown';
+}
+
+function originLocation(): string {
+    $ip = clientIp();
+    if ($ip === 'unknown') return 'Unknown';
+
+    $url = 'https://ipapi.co/' . rawurlencode($ip) . '/json/';
+    $ch = curl_init($url);
+    if ($ch === false) return 'Unknown';
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 3,
+        CURLOPT_TIMEOUT => 5,
+        CURLOPT_HTTPHEADER => ['Accept: application/json', 'User-Agent: JustPetrov-Admin/1.0'],
+    ]);
+    $json = curl_exec($ch);
+    $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if (!is_string($json) || $status < 200 || $status >= 300) return 'Unknown';
+    $d = json_decode($json, true);
+    if (!is_array($d) || !empty($d['error'])) return 'Unknown';
+
+    $city = trim((string)($d['city'] ?? ''));
+    $country = trim((string)($d['country_name'] ?? ''));
+    return trim($country . ($city !== '' && $country !== '' ? ' — ' : '') . $city) ?: 'Unknown';
+}
 function smtpRead($fp): string { $r=''; while(($line=fgets($fp,515))!==false){$r.=$line;if(strlen($line)<4||$line[3]!=='-')break;}return$r; }
 function smtpExpect($fp,int $code): void { $r=smtpRead($fp);if((int)substr($r,0,3)!==$code)throw new RuntimeException('SMTP error: '.trim($r)); }
 function smtpCommand($fp,string $command,int $code): void { fwrite($fp,$command."\r\n");smtpExpect($fp,$code); }
