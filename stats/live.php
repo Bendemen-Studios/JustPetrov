@@ -313,13 +313,14 @@ function refreshSpotifyStats(
 }
 
 try {
-    $needsUpdate = !is_file($dataPath) || (time() - (int) filemtime($dataPath)) >= $maxAge;
+    $forceUpdate = PHP_SAPI === 'cli';
+    $needsUpdate = $forceUpdate || !is_file($dataPath) || (time() - (int) filemtime($dataPath)) >= $maxAge;
     if ($needsUpdate) {
         $lock = fopen($lockPath, 'c');
         if ($lock !== false && flock($lock, LOCK_EX | LOCK_NB)) {
             try {
                 clearstatcache(true, $dataPath);
-                $needsUpdate = !is_file($dataPath) || (time() - (int) filemtime($dataPath)) >= $maxAge;
+                $needsUpdate = $forceUpdate || !is_file($dataPath) || (time() - (int) filemtime($dataPath)) >= $maxAge;
                 if ($needsUpdate) {
                     refreshSpotifyStats($dataPath, $historyPath, $configPath, $timeZoneName);
                 }
@@ -334,4 +335,6 @@ try {
     // Keep serving the last successful stats when Spotify or the updater is unavailable.
 }
 
-jsonResponse($dataPath);
+if (PHP_SAPI !== 'cli') {
+    jsonResponse($dataPath);
+}
