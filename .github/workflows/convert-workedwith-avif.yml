@@ -1,0 +1,66 @@
+name: Convert worked-with logos to AVIF
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "assets/workedwith/*.png"
+      - ".github/workflows/convert-workedwith-avif.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Sharp
+        run: npm install --no-save sharp
+
+      - name: Convert PNG logos to AVIF
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const sharp = require('sharp');
+
+          const dir = path.join(process.cwd(), 'assets', 'workedwith');
+          const files = fs.readdirSync(dir).filter(name => /\\.png$/i.test(name));
+
+          (async () => {
+            for (const file of files) {
+              const input = path.join(dir, file);
+              const output = path.join(dir, file.replace(/\\.png$/i, '.avif'));
+              await sharp(input)
+                .avif({ quality: 82, effort: 6 })
+                .toFile(output);
+              console.log(`Converted ${file} -> ${path.basename(output)}`);
+            }
+          })().catch(err => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Commit AVIF files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/workedwith/*.avif
+          if git diff --cached --quiet; then
+            echo "No AVIF changes."
+            exit 0
+          fi
+          git commit -m "Convert worked-with logos to AVIF"
+          git push
