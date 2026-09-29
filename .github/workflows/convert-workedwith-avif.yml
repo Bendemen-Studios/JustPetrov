@@ -36,12 +36,12 @@ jobs:
           const sharp = require('sharp');
 
           const dir = path.join(process.cwd(), 'assets', 'workedwith');
-          const files = fs.readdirSync(dir).filter(name => /\\.png$/i.test(name));
+          const files = fs.readdirSync(dir).filter(name => /\.png$/i.test(name));
 
           (async () => {
             for (const file of files) {
               const input = path.join(dir, file);
-              const output = path.join(dir, file.replace(/\\.png$/i, '.avif'));
+              const output = path.join(dir, file.replace(/\.png$/i, '.avif'));
               await sharp(input)
                 .avif({ quality: 82, effort: 6 })
                 .toFile(output);
