@@ -1,0 +1,74 @@
+name: Convert site PNG images to AVIF
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "assets/**/*.png"
+      - ".github/workflows/convert-site-avif.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Sharp
+        run: npm install --no-save sharp
+
+      - name: Convert PNG assets to AVIF
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const sharp = require('sharp');
+
+          const root = path.join(process.cwd(), 'assets');
+
+          function walk(dir) {
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            const files = [];
+            for (const entry of entries) {
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) files.push(...walk(full));
+              else if (/\.png$/i.test(entry.name)) files.push(full);
+            }
+            return files;
+          }
+
+          (async () => {
+            const files = walk(root);
+            for (const input of files) {
+              const output = input.replace(/\.png$/i, '.avif');
+              await sharp(input).avif({ quality: 82, effort: 6 }).toFile(output);
+              console.log(`Converted ${path.relative(process.cwd(), input)} -> ${path.relative(process.cwd(), output)}`);
+            }
+          })().catch(err => {
+            console.error(err);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Commit AVIF files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'assets/**/*.avif'
+          if git diff --cached --quiet; then
+            echo "No AVIF changes."
+            exit 0
+          fi
+          git commit -m "Convert site PNG assets to AVIF"
+          git push
