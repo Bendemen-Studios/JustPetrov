@@ -314,6 +314,7 @@ function refreshSpotifyStats(
 
 try {
     $forceUpdate = PHP_SAPI === 'cli';
+    if ($forceUpdate) echo '[Spotify Stats] Starting update...' . PHP_EOL;
     $needsUpdate = $forceUpdate || !is_file($dataPath) || (time() - (int) filemtime($dataPath)) >= $maxAge;
     if ($needsUpdate) {
         $lock = fopen($lockPath, 'c');
@@ -323,6 +324,15 @@ try {
                 $needsUpdate = $forceUpdate || !is_file($dataPath) || (time() - (int) filemtime($dataPath)) >= $maxAge;
                 if ($needsUpdate) {
                     refreshSpotifyStats($dataPath, $historyPath, $configPath, $timeZoneName);
+                    if ($forceUpdate) {
+                        $updated = json_decode((string) @file_get_contents($dataPath), true)['updated'] ?? null;
+                        if ($updated) {
+                            $stamp = (new DateTimeImmutable($updated))->setTimezone(new DateTimeZone('Europe/Amsterdam'));
+                            echo '[Spotify Stats] Data updated: ' . $stamp->format('d-m-Y H:i:s') . ' (Europe/Amsterdam Time)' . PHP_EOL;
+                        } else {
+                            echo '[Spotify Stats] Data updated successfully.' . PHP_EOL;
+                        }
+                    }
                 }
             } finally {
                 flock($lock, LOCK_UN);
@@ -332,6 +342,9 @@ try {
     }
 } catch (Throwable $error) {
     error_log('[Spotify Stats] ' . $error->getMessage());
+    if (PHP_SAPI === 'cli') {
+        echo '[Spotify Stats] ERROR: ' . $error->getMessage() . PHP_EOL;
+    }
     // Keep serving the last successful stats when Spotify or the updater is unavailable.
 }
 
