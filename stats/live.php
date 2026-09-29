@@ -28,6 +28,37 @@ function jsonResponse(string $path): void {
     echo $data;
 }
 
+function appendQuotaLog(string $url, int $status, ?string $retryAfter, string $body): void {
+    $path = __DIR__ . '/quota-log.json';
+    $logs = [];
+    if (is_file($path)) {
+        $parsed = json_decode((string) file_get_contents($path), true);
+        if (is_array($parsed)) $logs = $parsed;
+    }
+
+    $logs[] = [
+        'timestamp' => gmdate(DATE_ATOM),
+        'endpoint' => parse_url($url, PHP_URL_PATH) ?: $url,
+        'status' => $status,
+        'retryAfter' => $retryAfter !== null && ctype_digit($retryAfter) ? (int) $retryAfter : null,
+        'message' => trim((string) ($body !== '' ? (json_decode($body, true)['error']['message'] ?? $body) : 'Spotify quota exceeded')),
+    ];
+
+    // Keep the log useful without allowing it to grow forever.
+    $logs = array_slice($logs, -100);
+    writeQuotaLog($path, $logs);
+}
+
+function writeQuotaLog(string $path, array $logs): void {
+    $tmp = $path . '.tmp';
+    $json = json_encode($logs, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    if (file_put_contents($tmp, $json, LOCK_EX) !== false) {
+        @rename($tmp, $path);
+    } else {
+        @unlink($tmp);
+    }
+}
+
 function requestJson(string $url, array $options = []): array|int {
     $ch = curl_init($url);
     if ($ch === false) {
@@ -51,6 +82,15 @@ function requestJson(string $url, array $options = []): array|int {
         throw new RuntimeException('Spotify request failed: ' . ($error ?: 'unknown cURL error'));
     }
     if ($status === 204) return 204;
+    if ($status === 429) {
+        $retryAfter = null;
+        foreach (curl_getinfo($ch) as $key => $value) {
+            if ($key === 'retry_after') $retryAfter = (string) $value;
+        }
+        $retryAfter = $retryAfter ?? null;
+        appendQuotaLog($url, $status, $retryAfter, (string) $body);
+        throw new RuntimeException("Spotify quota exceeded (HTTP 429).");
+    }
     if ($status < 200 || $status >= 300) {
         throw new RuntimeException("Spotify API returned HTTP {$status}: " . substr((string) $body, 0, 500));
     }
