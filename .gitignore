@@ -3,3 +3,6 @@
 !.env.example
 
 # Force deployment refresh for static asset fixes
+
+stats/.spotify-config.php
+stats/.spotify-update.lock
