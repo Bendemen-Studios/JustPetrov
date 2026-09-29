@@ -66,6 +66,7 @@ function requestJson(string $url, array $options = []): array|int {
     }
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HEADER => true,
         CURLOPT_CONNECTTIMEOUT => 8,
         CURLOPT_TIMEOUT => 15,
         CURLOPT_FOLLOWLOCATION => true,
@@ -73,21 +74,23 @@ function requestJson(string $url, array $options = []): array|int {
         CURLOPT_POST => ($options['method'] ?? 'GET') === 'POST',
         CURLOPT_POSTFIELDS => $options['body'] ?? null,
     ]);
-    $body = curl_exec($ch);
+    $response = curl_exec($ch);
     $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $headerSize = (int) curl_getinfo($ch, CURLINFO_HEADER_SIZE);
     $error = curl_error($ch);
+    $responseHeaders = $headerSize > 0 ? substr((string) $response, 0, $headerSize) : '';
+    $body = $headerSize > 0 ? substr((string) $response, $headerSize) : $response;
     curl_close($ch);
 
-    if ($body === false) {
+    if ($response === false) {
         throw new RuntimeException('Spotify request failed: ' . ($error ?: 'unknown cURL error'));
     }
     if ($status === 204) return 204;
     if ($status === 429) {
         $retryAfter = null;
-        foreach (curl_getinfo($ch) as $key => $value) {
-            if ($key === 'retry_after') $retryAfter = (string) $value;
+        if (preg_match('/^Retry-After:\s*(.+)$/im', $responseHeaders, $match)) {
+            $retryAfter = trim($match[1]);
         }
-        $retryAfter = $retryAfter ?? null;
         appendQuotaLog($url, $status, $retryAfter, (string) $body);
         throw new RuntimeException("Spotify quota exceeded (HTTP 429).");
     }
