@@ -1,17 +1,17 @@
 {
-  "updated": "2026-09-29T00:02:27.880Z",
+  "updated": "2026-09-29T05:38:41.088Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 130,
-    "week": 362,
-    "month": 5100
+    "day": 316,
+    "week": 548,
+    "month": 5286
   },
   "live": {
     "isPlaying": true,
-    "trackId": "1rIKgCH4H52lrvDcz50hS8",
-    "progressMs": 158614,
-    "durationMs": 200646,
-    "fetchedAt": "2026-09-29T00:02:27.880Z"
+    "trackId": "3oPRxy48unetVoo046BdFZ",
+    "progressMs": 141569,
+    "durationMs": 223994,
+    "fetchedAt": "2026-09-29T05:38:41.088Z"
   },
   "topArtists": [
     {
@@ -19,12 +19,12 @@
       "url": "https://open.spotify.com/artist/1PbBg2aYjWLKRk84zJK15x"
     },
     {
-      "name": "Wulf",
-      "url": "https://open.spotify.com/artist/134sCDSe1w2zPnfCG4hT0f"
-    },
-    {
       "name": "Kensington",
       "url": "https://open.spotify.com/artist/5hHcAWKNV84BEbkRnbQ6A7"
+    },
+    {
+      "name": "Wulf",
+      "url": "https://open.spotify.com/artist/134sCDSe1w2zPnfCG4hT0f"
     },
     {
       "name": "Julien Cohen",
