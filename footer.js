@@ -93,7 +93,7 @@ document.querySelectorAll('.worked-slider').forEach(slider=>{
   if(/\\.png$/i.test(file)&&!img.parentElement?.matches('picture')){
    const picture=document.createElement('picture');
    const source=document.createElement('source');
-   source.srcset='/assets/workedwith/'+file.replace(/\\.png$/i,'.avif');
+   source.srcset='/assets/workedwith/'+file.replace(/\.png$/i,'.avif');
    source.type='image/avif';
    img.parentNode.insertBefore(picture,img);
    picture.append(source,img);
