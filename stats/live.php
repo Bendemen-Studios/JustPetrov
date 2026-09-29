@@ -10,7 +10,7 @@ $dataPath = __DIR__ . '/data.json';
 $historyPath = __DIR__ . '/listening.json';
 $lockPath = __DIR__ . '/.spotify-update.lock';
 $configPath = __DIR__ . '/.spotify-config.php';
-$maxAge = 15 * 60;
+$maxAge = 5 * 60;
 $timeZoneName = 'Europe/Amsterdam';
 
 function jsonResponse(string $path): void {
