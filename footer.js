@@ -90,7 +90,7 @@ document.querySelectorAll('.worked-slider').forEach(slider=>{
   if(!img)return;
   const src=img.getAttribute('src')||'';
   const file=src.split('/').pop().split('?')[0].split('#')[0];
-  if(/\\.png$/i.test(file)&&!img.parentElement?.matches('picture')){
+  if(/\.png$/i.test(file)&&!img.parentElement?.matches('picture')){
    const picture=document.createElement('picture');
    const source=document.createElement('source');
    source.srcset='/assets/workedwith/'+file.replace(/\.png$/i,'.avif');
