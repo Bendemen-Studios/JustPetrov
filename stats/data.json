@@ -1,17 +1,17 @@
 {
-  "updated": "2026-09-28T19:45:19.043Z",
+  "updated": "2026-09-29T00:02:27.880Z",
   "month": "September 2026",
   "listeningMinutes": {
-    "day": 187,
-    "week": 187,
-    "month": 4925
+    "day": 130,
+    "week": 362,
+    "month": 5100
   },
   "live": {
     "isPlaying": true,
-    "trackId": "3CRDbSIZ4r5MsZ0YwxuEkn",
-    "progressMs": 105027,
-    "durationMs": 202333,
-    "fetchedAt": "2026-09-28T19:45:19.043Z"
+    "trackId": "1rIKgCH4H52lrvDcz50hS8",
+    "progressMs": 158614,
+    "durationMs": 200646,
+    "fetchedAt": "2026-09-29T00:02:27.880Z"
   },
   "topArtists": [
     {
