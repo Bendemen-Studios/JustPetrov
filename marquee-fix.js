@@ -5,11 +5,11 @@
 
       slider.innerHTML=`
         <div class="worked-track" aria-label="Companies and servers">
-          <div class="worked-slide"><a href="https://eywamc.com" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/eywamc.png" alt="EywaMC" loading="eager" decoding="async"></a></div>
-          <div class="worked-slide"><a href="https://h20.gg/" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/h20esports.png" alt="H20 Esports" loading="eager" decoding="async"></a></div>
-          <div class="worked-slide"><a href="https://dc.steampunksmp.com" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/steampunksmp.png" alt="Steampunk SMP" loading="eager" decoding="async"></a></div>
+          <div class="worked-slide"><a href="https://eywamc.com" target="_blank" rel="noopener noreferrer"><picture><source srcset="/assets/workedwith/eywamc.png" type="image/avif"><img src="/assets/workedwith/eywamc.png" alt="EywaMC" loading="eager" decoding="async"></picture></a></div>
+          <div class="worked-slide"><a href="https://h20.gg/" target="_blank" rel="noopener noreferrer"><picture><source srcset="/assets/workedwith/h20esports.png" type="image/avif"><img src="/assets/workedwith/h20esports.png" alt="H20 Esports" loading="eager" decoding="async"></picture></a></div>
+          <div class="worked-slide"><a href="https://dc.steampunksmp.com" target="_blank" rel="noopener noreferrer"><picture><source srcset="/assets/workedwith/steampunksmp.png" type="image/avif"><img src="/assets/workedwith/steampunksmp.png" alt="Steampunk SMP" loading="eager" decoding="async"></picture></a></div>
           <div class="worked-slide"><a href="https://www.stichtingsuperhelden.nl/" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/stichtingssuperhelden.svg" alt="Stichting Superhelden" loading="eager" decoding="async"></a></div>
-          <div class="worked-slide"><a href="https://discord.diehardsmp.com" target="_blank" rel="noopener noreferrer"><img src="/assets/workedwith/diehardsmp.png" alt="Diehard SMP" loading="eager" decoding="async"></a></div>
+          <div class="worked-slide"><a href="https://discord.diehardsmp.com" target="_blank" rel="noopener noreferrer"><picture><source srcset="/assets/workedwith/diehardsmp.png" type="image/avif"><img src="/assets/workedwith/diehardsmp.png" alt="Diehard SMP" loading="eager" decoding="async"></picture></a></div>
         </div>`
 
       const track=slider.querySelector('.worked-track');
