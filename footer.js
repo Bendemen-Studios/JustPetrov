@@ -88,7 +88,17 @@ document.querySelectorAll('.worked-slider').forEach(slider=>{
  slides.forEach(slide=>{
   const img=slide.querySelector('img');
   if(!img)return;
-  const key=((img.getAttribute('src')||'').split('/').pop().split('?')[0].split('#')[0]).toLowerCase();
+  const src=img.getAttribute('src')||'';
+  const file=src.split('/').pop().split('?')[0].split('#')[0];
+  if(/\\.png$/i.test(file)&&!img.parentElement?.matches('picture')){
+   const picture=document.createElement('picture');
+   const source=document.createElement('source');
+   source.srcset='/assets/workedwith/'+file.replace(/\\.png$/i,'.avif');
+   source.type='image/avif';
+   img.parentNode.insertBefore(picture,img);
+   picture.append(source,img);
+  }
+  const key=file.toLowerCase();
   const href=links[key];
   if(href&&!slide.querySelector('a')){const a=document.createElement('a');a.href=href;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label','Open '+(img.alt||key));img.parentNode.insertBefore(a,img);a.appendChild(img)}
  });
