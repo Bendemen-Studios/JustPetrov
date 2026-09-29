@@ -98,12 +98,12 @@ function refreshSpotifyStats(
     $token = requestJson('https://accounts.spotify.com/api/token', [
         'method' => 'POST',
         'headers' => [
-            'Authorization: Basic ' . base64_encode($clientId . ':' . ($config['client_secret'] ?? getenv('SPOTIFY_CLIENT_SECRET') ?: '')),
             'Content-Type: application/x-www-form-urlencoded',
         ],
         'body' => http_build_query([
             'grant_type' => 'refresh_token',
             'refresh_token' => $refreshToken,
+            'client_id' => $clientId,
         ]),
     ]);
 
@@ -119,10 +119,14 @@ function refreshSpotifyStats(
     $recent = requestJson('https://api.spotify.com/v1/me/player/recently-played?limit=50', [
         'headers' => $authHeaders,
     ]);
-    $currentlyPlaying = requestJson('https://api.spotify.com/v1/me/player/currently-playing', [
-        'headers' => $authHeaders,
-    ]);
-    if ($currentlyPlaying === 204) $currentlyPlaying = null;
+    try {
+        $currentlyPlaying = requestJson('https://api.spotify.com/v1/me/player/currently-playing', [
+            'headers' => $authHeaders,
+        ]);
+        if ($currentlyPlaying === 204) $currentlyPlaying = null;
+    } catch (Throwable) {
+        $currentlyPlaying = null;
+    }
 
     $data = [];
     if (is_file($dataPath)) {
