@@ -369,7 +369,7 @@ function refreshSpotifyStats(
     $weekTotals = [];
     $dayTotals = [];
     foreach ($history['days'] as $date => $day) {
-        if (!is_array($day) || !preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', (string) $date)) continue;
+        if (!is_array($day) || !preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', (string) $date)) continue;
         $seconds = max(0, (int) round(((float) ($day['minutes'] ?? 0)) * 60));
         $dayTotals[$date] = ($dayTotals[$date] ?? 0) + $seconds;
         $year = substr($date, 0, 4);
