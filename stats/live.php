@@ -328,14 +328,14 @@ function refreshSpotifyStats(
 
     $topArtists = array_map(
         fn($item) => ['name' => $item['name'], 'url' => $item['url']],
-        array_slice($artists, 0, 5)
+        $artists
     );
     $topTracks = array_map(
         fn($item) => [
             'name' => ($item['name'] ?? 'Unknown track') . ' — ' . ($item['artist'] ?? 'Unknown artist'),
             'url' => $item['url'] ?? '#',
         ],
-        array_slice($tracks, 0, 5)
+        $tracks
     );
 
     $live = null;
