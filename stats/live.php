@@ -163,9 +163,61 @@ function refreshSpotifyStats(
         'Accept: application/json',
     ];
 
+    // Fetch the complete current month's available playback history, not just
+    // Spotify's latest 50 tracks. Keep the month marker so pagination only runs
+    // once per month; normal refreshes then use the latest page.
+    $backfillMonth = (new DateTimeImmutable('now', new DateTimeZone($timeZoneName)))->format('Y-m');
+    $historyForBackfill = [];
+    if (is_file($historyPath)) {
+        $parsedHistory = json_decode((string) file_get_contents($historyPath), true);
+        if (is_array($parsedHistory)) $historyForBackfill = $parsedHistory;
+    }
     $recent = requestJson('https://api.spotify.com/v1/me/player/recently-played?limit=50', [
         'headers' => $authHeaders,
     ]);
+    $recentItems = $recent['items'] ?? [];
+    if (($historyForBackfill['backfillCompleteMonth'] ?? '') !== $backfillMonth) {
+        $monthStart = (new DateTimeImmutable('first day of this month 00:00:00', new DateTimeZone($timeZoneName)))->getTimestamp() * 1000;
+        $cursor = null;
+        $pages = 0;
+        while ($recentItems && $pages < 100) {
+            $oldest = $recentItems[count($recentItems) - 1] ?? null;
+            $playedAt = $oldest['played_at'] ?? null;
+            if (!$playedAt) break;
+            $oldestMs = (new DateTimeImmutable($playedAt))->getTimestamp() * 1000;
+            if ($oldestMs < $monthStart) {
+                $historyForBackfill['backfillCompleteMonth'] = $backfillMonth;
+                break;
+            }
+            if ($cursor !== null && $oldestMs >= $cursor) break;
+            $cursor = $oldestMs;
+            $page = requestJson('https://api.spotify.com/v1/me/player/recently-played?limit=50&before=' . $cursor, [
+                'headers' => $authHeaders,
+            ]);
+            $pageItems = $page['items'] ?? [];
+            if (!$pageItems) {
+                $historyForBackfill['backfillCompleteMonth'] = $backfillMonth;
+                break;
+            }
+            $recentItems = array_merge($recentItems, $pageItems);
+            $recentItems = array_values(array_reduce($recentItems, static function (array $carry, array $item): array {
+                $key = (string) ($item['played_at'] ?? '') . '|' . (string) ($item['track']['id'] ?? '');
+                if ($key !== '|') $carry[$key] = $item;
+                return $carry;
+            }, []));
+            $last = $pageItems[count($pageItems) - 1] ?? null;
+            if (count($pageItems) < 50 || empty($last['played_at']) ||
+                (new DateTimeImmutable($last['played_at']))->getTimestamp() * 1000 < $monthStart) {
+                $historyForBackfill['backfillCompleteMonth'] = $backfillMonth;
+                break;
+            }
+            $pages++;
+        }
+        // Preserve the backfill marker when the history is loaded below.
+        $backfillCompleteMonth = $historyForBackfill['backfillCompleteMonth'] ?? '';
+    } else {
+        $backfillCompleteMonth = $backfillMonth;
+    }
     try {
         $currentlyPlaying = requestJson('https://api.spotify.com/v1/me/player/currently-playing', [
             'headers' => $authHeaders,
@@ -188,12 +240,13 @@ function refreshSpotifyStats(
     }
     $history['processed'] ??= [];
     $history['days'] ??= [];
+    if (!empty($backfillCompleteMonth)) $history['backfillCompleteMonth'] = $backfillCompleteMonth;
 
     $processed = array_fill_keys($history['processed'], true);
     $tz = new DateTimeZone($timeZoneName);
     $now = new DateTimeImmutable('now', $tz);
 
-    foreach (($recent['items'] ?? []) as $item) {
+    foreach ($recentItems as $item) {
         $track = $item['track'] ?? null;
         $playedAt = $item['played_at'] ?? null;
         if (!is_array($track) || empty($track['id']) || !$playedAt) continue;
