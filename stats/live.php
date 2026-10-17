@@ -363,6 +363,50 @@ function refreshSpotifyStats(
         ];
     }
 
+    // Calculate all-time listening records from the collected day-by-day history.
+    $yearTotals = [];
+    $monthTotals = [];
+    $weekTotals = [];
+    $dayTotals = [];
+    foreach ($history['days'] as $date => $day) {
+        if (!is_array($day) || !preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', (string) $date)) continue;
+        $seconds = max(0, (int) round(((float) ($day['minutes'] ?? 0)) * 60));
+        $dayTotals[$date] = ($dayTotals[$date] ?? 0) + $seconds;
+        $year = substr($date, 0, 4);
+        $month = substr($date, 0, 7);
+        $yearTotals[$year] = ($yearTotals[$year] ?? 0) + $seconds;
+        $monthTotals[$month] = ($monthTotals[$month] ?? 0) + $seconds;
+        $dateObj = DateTimeImmutable::createFromFormat('!Y-m-d', $date, $tz);
+        if ($dateObj) {
+            $weekStartDate = $dateObj->modify('monday this week')->format('Y-m-d');
+            $weekTotals[$weekStartDate] = ($weekTotals[$weekStartDate] ?? 0) + $seconds;
+        }
+    }
+
+    $bestRecord = static function (array $totals, callable $label): array {
+        if (!$totals) return ['seconds' => 0, 'period' => 'NO DATA YET'];
+        arsort($totals, SORT_NUMERIC);
+        $periodKey = (string) array_key_first($totals);
+        return ['seconds' => (int) $totals[$periodKey], 'period' => $label($periodKey)];
+    };
+    $records = [
+        'year' => $bestRecord($yearTotals, static fn($key) => $key),
+        'month' => $bestRecord($monthTotals, static function ($key) {
+            $date = DateTimeImmutable::createFromFormat('!Y-m', $key);
+            return $date ? strtoupper($date->format('F Y')) : $key;
+        }),
+        'week' => $bestRecord($weekTotals, static function ($key) use ($tz) {
+            $date = DateTimeImmutable::createFromFormat('!Y-m-d', $key, $tz);
+            if (!$date) return $key;
+            $weekOfMonth = (int) ceil((int) $date->format('j') / 7);
+            return strtoupper($date->format('F Y') . ' / WEEK ' . $weekOfMonth);
+        }),
+        'day' => $bestRecord($dayTotals, static function ($key) {
+            $date = DateTimeImmutable::createFromFormat('!Y-m-d', $key);
+            return $date ? strtoupper($date->format('d/m/Y')) : $key;
+        }),
+    ];
+
     $data = [
         'updated' => $now->format(DATE_ATOM),
         'month' => $now->format('F Y'),
@@ -372,6 +416,7 @@ function refreshSpotifyStats(
             'month' => (int) floor($monthMinutes),
         ],
         'live' => $live,
+        'records' => $records,
         'topArtists' => $topArtists,
         'topTracks' => $topTracks,
     ];
