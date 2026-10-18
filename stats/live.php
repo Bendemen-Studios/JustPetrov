@@ -36,15 +36,15 @@ function appendQuotaLog(string $url, int $status, ?string $retryAfter, string $b
         if (is_array($parsed)) $logs = $parsed;
     }
 
+    $decodedBody = json_decode($body, true);
     $logs[] = [
         'timestamp' => gmdate(DATE_ATOM),
         'endpoint' => parse_url($url, PHP_URL_PATH) ?: $url,
         'status' => $status,
         'retryAfter' => $retryAfter !== null && ctype_digit($retryAfter) ? (int) $retryAfter : null,
-        'message' => trim((string) ($body !== '' ? (json_decode($body, true)['error']['message'] ?? $body) : 'Spotify quota exceeded')),
+        'message' => trim((string) ($body !== '' ? ($decodedBody['error']['message'] ?? $body) : 'Spotify quota exceeded')),
     ];
 
-    // Keep the log useful without allowing it to grow forever.
     $logs = array_slice($logs, -100);
     writeQuotaLog($path, $logs);
 }
@@ -61,9 +61,8 @@ function writeQuotaLog(string $path, array $logs): void {
 
 function requestJson(string $url, array $options = []): array|int {
     $ch = curl_init($url);
-    if ($ch === false) {
-        throw new RuntimeException('Unable to initialize cURL.');
-    }
+    if ($ch === false) throw new RuntimeException('Unable to initialize cURL.');
+
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HEADER => true,
@@ -83,28 +82,21 @@ function requestJson(string $url, array $options = []): array|int {
     $body = $headerSize > 0 ? substr((string) $response, $headerSize) : $response;
     curl_close($ch);
 
-    if ($response === false) {
-        throw new RuntimeException('Spotify request failed: ' . ($error ?: 'unknown cURL error'));
-    }
+    if ($response === false) throw new RuntimeException('Spotify request failed: ' . ($error ?: 'unknown cURL error'));
     if ($status === 204) return 204;
     if ($status === 429) {
         $retryAfter = null;
-        if (preg_match('/^Retry-After:\s*(.+)$/im', $responseHeaders, $match)) {
-            $retryAfter = trim($match[1]);
-        }
+        if (preg_match('/^Retry-After:\\s*(.+)$/im', $responseHeaders, $match)) $retryAfter = trim($match[1]);
         appendQuotaLog($url, $status, $retryAfter, (string) $body);
-        throw new RuntimeException("Spotify quota exceeded (HTTP 429).");
+        throw new RuntimeException('Spotify quota exceeded (HTTP 429).');
     }
     if ($status < 200 || $status >= 300) {
         $endpoint = (string) (parse_url($url, PHP_URL_PATH) ?: $url);
         $method = strtoupper((string) ($options['method'] ?? 'GET'));
-        $message = trim((string) $body);
-        throw new RuntimeException("Spotify API returned HTTP {$status} for {$method} {$endpoint}: " . substr($message, 0, 500));
+        throw new RuntimeException("Spotify API returned HTTP {$status} for {$method} {$endpoint}: " . substr(trim((string) $body), 0, 500));
     }
     $json = json_decode((string) $body, true);
-    if (!is_array($json)) {
-        throw new RuntimeException('Spotify returned invalid JSON.');
-    }
+    if (!is_array($json)) throw new RuntimeException('Spotify returned invalid JSON.');
     return $json;
 }
 
@@ -137,103 +129,92 @@ function refreshSpotifyStats(
     $refreshToken = getenv('SPOTIFY_REFRESH_TOKEN') ?: ($config['refresh_token'] ?? '');
     $configuredTimeZone = getenv('STATS_TIMEZONE') ?: ($config['timezone'] ?? $timeZoneName);
     if ($configuredTimeZone) $timeZoneName = $configuredTimeZone;
-
-    if (!$clientId || !$refreshToken) {
-        throw new RuntimeException('Spotify credentials are not configured.');
-    }
+    if (!$clientId || !$refreshToken) throw new RuntimeException('Spotify credentials are not configured.');
 
     $token = requestJson('https://accounts.spotify.com/api/token', [
         'method' => 'POST',
-        'headers' => [
-            'Content-Type: application/x-www-form-urlencoded',
-        ],
+        'headers' => ['Content-Type: application/x-www-form-urlencoded'],
         'body' => http_build_query([
             'grant_type' => 'refresh_token',
             'refresh_token' => $refreshToken,
             'client_id' => $clientId,
         ]),
     ]);
-
     if (!is_array($token) || empty($token['access_token'])) {
         throw new RuntimeException('Spotify token refresh returned no access token.');
     }
+    $authHeaders = ['Authorization: Bearer ' . $token['access_token'], 'Accept: application/json'];
 
-    $authHeaders = [
-        'Authorization: Bearer ' . $token['access_token'],
-        'Accept: application/json',
-    ];
-
-    // Backfill all history Spotify makes available using before-cursor pagination.
-    // Work in bounded chunks so a single web/cron run cannot time out. The cursor
-    // is persisted in listening.json and the next cron run continues further back.
-    $historyForBackfill = [];
+    $history = ['processed' => [], 'days' => []];
     if (is_file($historyPath)) {
         $parsedHistory = json_decode((string) file_get_contents($historyPath), true);
-        if (is_array($parsedHistory)) $historyForBackfill = $parsedHistory;
+        if (is_array($parsedHistory)) $history = $parsedHistory;
+    }
+    $history['processed'] = is_array($history['processed'] ?? null) ? $history['processed'] : [];
+    $history['days'] = is_array($history['days'] ?? null) ? $history['days'] : [];
+
+    $recent = requestJson('https://api.spotify.com/v1/me/player/recently-played?limit=50', ['headers' => $authHeaders]);
+    $recentItems = is_array($recent) ? ($recent['items'] ?? []) : [];
+    $backfillComplete = ($history['backfillComplete'] ?? false) === true;
+    $backfillCursor = isset($history['backfillCursor']) ? (int) $history['backfillCursor'] : 0;
+
+    // A previously stored completion flag can be stale (older versions marked a
+    // short/repeated page as complete). Resume once from the oldest known play.
+    if ($backfillComplete && !empty($recentItems)) {
+        $backfillComplete = false;
+        $backfillCursor = 0;
     }
 
-    $recent = requestJson('https://api.spotify.com/v1/me/player/recently-played?limit=50', [
-        'headers' => $authHeaders,
-    ]);
-    $recentItems = $recent['items'] ?? [];
-    $backfillComplete = ($historyForBackfill['backfillComplete'] ?? false) === true;
-    $backfillCursor = isset($historyForBackfill['backfillCursor']) ? (int) $historyForBackfill['backfillCursor'] : 0;
-
     if (!$backfillComplete && $recentItems) {
+        // On first run, start just before the oldest item in the current page.
         if ($backfillCursor <= 0) {
             $oldestInitial = $recentItems[count($recentItems) - 1] ?? null;
             if (!empty($oldestInitial['played_at'])) {
-                $backfillCursor = (new DateTimeImmutable($oldestInitial['played_at']))->getTimestamp() * 1000;
+                $backfillCursor = ((new DateTimeImmutable($oldestInitial['played_at']))->getTimestamp() * 1000) - 1;
             }
         }
 
         $backfillPagesThisRun = 0;
         $maxBackfillPagesPerRun = 10;
         while ($backfillCursor > 0 && $backfillPagesThisRun < $maxBackfillPagesPerRun) {
-            $page = requestJson('https://api.spotify.com/v1/me/player/recently-played?limit=50&before=' . $backfillCursor, [
-                'headers' => $authHeaders,
-            ]);
-            $pageItems = $page['items'] ?? [];
+            $page = requestJson('https://api.spotify.com/v1/me/player/recently-played?limit=50&before=' . $backfillCursor, ['headers' => $authHeaders]);
+            $pageItems = is_array($page) ? ($page['items'] ?? []) : [];
+
+            // Empty page means the API currently has no older items available.
             if (!$pageItems) {
                 $backfillComplete = true;
                 break;
             }
 
-            $recentItems = array_merge($recentItems, $pageItems);
             $oldestPageItem = $pageItems[count($pageItems) - 1] ?? null;
             if (empty($oldestPageItem['played_at'])) {
-                $backfillComplete = true;
+                // Do not mark complete on malformed data; allow a later retry.
+                break;
+            }
+            $nextCursor = ((new DateTimeImmutable($oldestPageItem['played_at']))->getTimestamp() * 1000) - 1;
+            if ($nextCursor >= $backfillCursor) {
+                // Repeated/non-advancing page: stop without claiming completion.
                 break;
             }
 
-            $nextCursor = (new DateTimeImmutable($oldestPageItem['played_at']))->getTimestamp() * 1000;
-            if ($nextCursor >= $backfillCursor) {
-                // Prevent an infinite loop if the API returns a repeated page.
-                break;
-            }
+            $recentItems = array_merge($recentItems, $pageItems);
             $backfillCursor = $nextCursor;
             $backfillPagesThisRun++;
-
             if (count($pageItems) < 50) {
                 $backfillComplete = true;
                 break;
             }
         }
 
-        // Deduplicate pages by playback timestamp + track ID before processing.
         $recentItems = array_values(array_reduce($recentItems, static function (array $carry, array $item): array {
             $key = (string) ($item['played_at'] ?? '') . '|' . (string) ($item['track']['id'] ?? '');
             if ($key !== '|') $carry[$key] = $item;
             return $carry;
         }, []));
-    } else {
-        $backfillComplete = $backfillComplete || !$recentItems;
     }
 
     try {
-        $currentlyPlaying = requestJson('https://api.spotify.com/v1/me/player/currently-playing', [
-            'headers' => $authHeaders,
-        ]);
+        $currentlyPlaying = requestJson('https://api.spotify.com/v1/me/player/currently-playing', ['headers' => $authHeaders]);
         if ($currentlyPlaying === 204) $currentlyPlaying = null;
     } catch (Throwable) {
         $currentlyPlaying = null;
@@ -245,16 +226,8 @@ function refreshSpotifyStats(
         if (is_array($parsed)) $data = $parsed;
     }
 
-    $history = ['processed' => [], 'days' => []];
-    if (is_file($historyPath)) {
-        $parsed = json_decode((string) file_get_contents($historyPath), true);
-        if (is_array($parsed)) $history = $parsed;
-    }
-    $history['processed'] ??= [];
-    $history['days'] ??= [];
     $history['backfillCursor'] = $backfillCursor;
     $history['backfillComplete'] = $backfillComplete;
-
     $processed = array_fill_keys($history['processed'], true);
     $tz = new DateTimeZone($timeZoneName);
     $now = new DateTimeImmutable('now', $tz);
@@ -263,7 +236,6 @@ function refreshSpotifyStats(
         $track = $item['track'] ?? null;
         $playedAt = $item['played_at'] ?? null;
         if (!is_array($track) || empty($track['id']) || !$playedAt) continue;
-
         $key = $playedAt . '|' . $track['id'];
         if (isset($processed[$key])) continue;
 
@@ -272,16 +244,13 @@ function refreshSpotifyStats(
         } catch (Throwable) {
             continue;
         }
-
         $date = localDate($played);
         if (!isset($history['days'][$date]) || !is_array($history['days'][$date])) {
             $history['days'][$date] = ['minutes' => 0, 'tracks' => []];
         }
-
         $history['days'][$date]['minutes'] += ((float) ($track['duration_ms'] ?? 0)) / 60000;
         $artist = $track['artists'][0] ?? [];
         $trackId = (string) $track['id'];
-
         if (!isset($history['days'][$date]['tracks'][$trackId])) {
             $history['days'][$date]['tracks'][$trackId] = [
                 'name' => $track['name'] ?? 'Unknown track',
@@ -294,7 +263,6 @@ function refreshSpotifyStats(
         $history['days'][$date]['tracks'][$trackId]['plays']++;
         $processed[$key] = true;
     }
-
     $history['processed'] = array_keys($processed);
 
     $today = $now->format('Y-m-d');
@@ -320,14 +288,9 @@ function refreshSpotifyStats(
                     $tracks[$id]['plays'] = 0;
                 }
                 $tracks[$id]['plays'] += (int) ($track['plays'] ?? 0);
-
                 $artistName = $track['artist'] ?? 'Unknown artist';
                 if (!isset($artists[$artistName])) {
-                    $artists[$artistName] = [
-                        'name' => $artistName,
-                        'url' => $track['artistUrl'] ?? '#',
-                        'plays' => 0,
-                    ];
+                    $artists[$artistName] = ['name' => $artistName, 'url' => $track['artistUrl'] ?? '#', 'plays' => 0];
                 }
                 $artists[$artistName]['plays'] += (int) ($track['plays'] ?? 0);
             }
@@ -336,18 +299,11 @@ function refreshSpotifyStats(
 
     usort($artists, fn($a, $b) => $b['plays'] <=> $a['plays']);
     usort($tracks, fn($a, $b) => $b['plays'] <=> $a['plays']);
-
-    $topArtists = array_map(
-        fn($item) => ['name' => $item['name'], 'url' => $item['url']],
-        array_slice($artists, 0, 5)
-    );
-    $topTracks = array_map(
-        fn($item) => [
-            'name' => ($item['name'] ?? 'Unknown track') . ' — ' . ($item['artist'] ?? 'Unknown artist'),
-            'url' => $item['url'] ?? '#',
-        ],
-        array_slice($tracks, 0, 5)
-    );
+    $topArtists = array_map(fn($item) => ['name' => $item['name'], 'url' => $item['url']], array_slice($artists, 0, 5));
+    $topTracks = array_map(fn($item) => [
+        'name' => ($item['name'] ?? 'Unknown track') . ' — ' . ($item['artist'] ?? 'Unknown artist'),
+        'url' => $item['url'] ?? '#',
+    ], array_slice($tracks, 0, 5));
 
     $live = null;
     if (is_array($currentlyPlaying) && !empty($currentlyPlaying['item']['id'])) {
@@ -363,7 +319,6 @@ function refreshSpotifyStats(
         ];
     }
 
-    // Calculate all-time listening records from the collected day-by-day history.
     $yearTotals = [];
     $monthTotals = [];
     $weekTotals = [];
@@ -455,12 +410,7 @@ try {
     }
 } catch (Throwable $error) {
     error_log('[Spotify Stats] ' . $error->getMessage());
-    if (PHP_SAPI === 'cli') {
-        echo '[Spotify Stats] ERROR: ' . $error->getMessage() . PHP_EOL;
-    }
-    // Keep serving the last successful stats when Spotify or the updater is unavailable.
+    if (PHP_SAPI === 'cli') echo '[Spotify Stats] ERROR: ' . $error->getMessage() . PHP_EOL;
 }
 
-if (PHP_SAPI !== 'cli') {
-    jsonResponse($dataPath);
-}
+if (PHP_SAPI !== 'cli') jsonResponse($dataPath);
