@@ -157,12 +157,16 @@ function refreshSpotifyStats(
     $recentItems = is_array($recent) ? ($recent['items'] ?? []) : [];
     $backfillComplete = ($history['backfillComplete'] ?? false) === true;
     $backfillCursor = isset($history['backfillCursor']) ? (int) $history['backfillCursor'] : 0;
+    $backfillVersion = (int) ($history['backfillVersion'] ?? 0);
 
-    // A previously stored completion flag can be stale (older versions marked a
-    // short/repeated page as complete). Resume once from the oldest known play.
-    if ($backfillComplete && !empty($recentItems)) {
-        $backfillComplete = false;
-        $backfillCursor = 0;
+    // One-time migration: earlier versions could mark the backfill complete
+    // prematurely. Resume from the saved cursor; never reset it to the newest
+    // page, and never reopen a correctly completed backfill on every run.
+    if ($backfillVersion < 2) {
+        if ($backfillComplete && $backfillCursor > 0) {
+            $backfillComplete = false;
+        }
+        $history['backfillVersion'] = 2;
     }
 
     if (!$backfillComplete && $recentItems) {
@@ -228,6 +232,7 @@ function refreshSpotifyStats(
 
     $history['backfillCursor'] = $backfillCursor;
     $history['backfillComplete'] = $backfillComplete;
+    $history['backfillVersion'] = 2;
     $processed = array_fill_keys($history['processed'], true);
     $tz = new DateTimeZone($timeZoneName);
     $now = new DateTimeImmutable('now', $tz);
